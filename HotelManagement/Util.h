@@ -2,6 +2,7 @@
 #define UTIL_H_
 #include <string>
 #include <vector>
+#include <afxdb.h>
 
 namespace BasicUtil
 {
@@ -21,6 +22,9 @@ namespace BasicUtil
 
 	unsigned int SplitString(const std::string &str_input,
 		std::vector<std::string> &ret_list, char ch);
+
+	/* use for update or delete or insert database */
+	void ExecuteQuery(CDatabase database, CString query);
 
 }
 

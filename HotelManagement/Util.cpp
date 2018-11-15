@@ -143,4 +143,8 @@ unsigned int BasicUtil::SplitString(const std::string &str_input,
 }
 
 
+void BasicUtil::ExecuteQuery(CDatabase database, CString query)
+{
+	database.ExecuteSQL(query);
+}
 

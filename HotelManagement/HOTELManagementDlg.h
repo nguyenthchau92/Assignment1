@@ -5,6 +5,7 @@
 #pragma once
 #include "afxwin.h"
 #include "AcInfo.h"
+#include <afxdb.h>
 
 
 // HOTELManagementDlg dialog
@@ -22,6 +23,12 @@ public:
 
 
 // Implementation
+public:
+	CString connection;
+	CDatabase database;
+
+	void InitGUI();
+	void ConnectDB();
 protected:
 	HICON m_hIcon;
 
@@ -39,4 +46,6 @@ protected:
 public:
 	afx_msg void OnBnClickedBtnLogin();
 	afx_msg void OnBnClickedBtnRegister();
+protected:
+	CListBox list_data;
 };

@@ -46,10 +46,7 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
 END_MESSAGE_MAP()
 
-
 // HOTELManagementDlg dialog
-
-
 
 HOTELManagementDlg::HOTELManagementDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(HOTELManagementDlg::IDD, pParent)
@@ -62,6 +59,7 @@ void HOTELManagementDlg::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_EDIT_USERNAME_LOGIN, edit_username);
 	DDX_Control(pDX, IDC_EDIT_PASSWORD_LOGIN, edit_password);
+	DDX_Control(pDX, IDC_LIST_DATA, list_data);
 }
 
 BEGIN_MESSAGE_MAP(HOTELManagementDlg, CDialogEx)
@@ -105,6 +103,10 @@ BOOL HOTELManagementDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	// TODO: Add extra initialization here
+	// create an connection to database
+	InitGUI();
+
+
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -157,8 +159,6 @@ HCURSOR HOTELManagementDlg::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
 }
-
-
 
 void HOTELManagementDlg::OnBnClickedBtnLogin()
 {
@@ -255,23 +255,62 @@ void HOTELManagementDlg::OnBnClickedBtnRegister()
 	RegisterDlg register_dlg;
 	if (register_dlg.DoModal() == IDOK)
 	{
-		p_ac_info = new AcInfomation();
-		CString str_u = register_dlg.get_str_user();
+		CString str_user = register_dlg.get_str_user();
 		CString str_pass = register_dlg.get_str_pass();
+		CString str_staffID = register_dlg.get_str_staffID();
+
 		bool isSuccess = register_dlg.get_is_success();
 		if (isSuccess)
 		{
-			std::string strUser = CStringA(str_u);
+			std::string strUser = CStringA(str_user);
 			std::string strPass = CStringA(str_pass);
-			p_ac_info->set_user(strUser);
-			p_ac_info->set_pass(strPass);
-
-			std::vector<std::string> data_list;
-			data_list.push_back(strUser);
-			data_list.push_back(strPass);
-
-			std::string str_local_path = BasicUtil::CreatePathFileForAccount();
-			BasicUtil::WriteFile(str_local_path, data_list);
+			CString query = L"insert into register values('";
+			query += str_staffID + L"','" + str_user + L"','" + str_pass  + L"')";
+			MessageBox(query);
+			database.ExecuteSQL(query);
+			int x;
 		}
 	}
 }
+
+void HOTELManagementDlg::InitGUI()
+{
+
+	ConnectDB();
+}
+
+void HOTELManagementDlg::ConnectDB()
+{
+	if (database.IsOpen())
+	{
+		MessageBox(_T("The database has been connected to applicaiton"));
+	}
+	connection = _T("Driver={SQL Server Native Client 11.0};Server=IPHONE-6-PLUS\\SQLSERVER2014;Database=TestManagement;Trusted_Connection=Yes;Uid=sa;Pwd=12345678;");
+	if (database.OpenEx(connection, CDatabase::useCursorLib))
+	{
+		//MessageBox(_T("Connected database successfully"));
+		CString query = L"Select * from register";
+		
+		CRecordset recordset(&database);
+		CString temp, record;
+		recordset.Open(CRecordset::forwardOnly, query, CRecordset::readOnly);
+		while (!recordset.IsEOF())
+		{
+			record = _T("");
+			int len = recordset.GetODBCFieldCount();
+			for (int i = 0	; i < len; i++)
+			{
+				recordset.GetFieldValue(i, temp);
+				record += temp + _T(" | ");
+			}
+			list_data.AddString(record);
+			recordset.MoveNext();
+		}
+
+		UpdateData(false);
+	}
+
+}
+
+
+
