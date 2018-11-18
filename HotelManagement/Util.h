@@ -16,20 +16,14 @@ namespace BasicUtil
 	bool CreateFolder(std::string& path_folder);
 
 	std::string CreatePathFileForAccount();
-	std::string CreatePathfileAccountInfo(const std::string& str_file);
+	std::string CreatePathfileRoomInfo(const std::string& str_file);
 
 	BOOL DirectoryExist(const char* dirName);
 
 	unsigned int SplitString(const std::string &str_input,
 		std::vector<std::string> &ret_list, char ch);
 
-	/* use for update or delete or insert database */
-	void ExecuteQuery(CDatabase database, CString query);
-
 }
-
-
-
 
 
 #endif // !UTIL_H_

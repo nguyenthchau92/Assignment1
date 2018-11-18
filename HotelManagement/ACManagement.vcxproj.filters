@@ -13,14 +13,17 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Source Files\AccountInfo">
-      <UniqueIdentifier>{27c22da5-f7d8-47b5-a293-3d11d0978eee}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\AcInfo">
       <UniqueIdentifier>{f41e4342-aee1-4696-afd5-33c6976d0853}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Util">
       <UniqueIdentifier>{473db3b0-9ea1-4614-be33-842553dbf357}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\RoomInfo">
+      <UniqueIdentifier>{27c22da5-f7d8-47b5-a293-3d11d0978eee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\DatabaseManagement">
+      <UniqueIdentifier>{ef78ccc1-05ea-4577-8ce3-7204007a5a08}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -39,17 +42,11 @@
     <ClInclude Include="RegisterDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AccountInformationDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Util.h">
       <Filter>Source Files\Util</Filter>
     </ClInclude>
     <ClInclude Include="AcInfo.h">
       <Filter>Source Files\AcInfo</Filter>
-    </ClInclude>
-    <ClInclude Include="AccountInfo.h">
-      <Filter>Source Files\AccountInfo</Filter>
     </ClInclude>
     <ClInclude Include="StoragePathDlg.h">
       <Filter>Header Files</Filter>
@@ -60,6 +57,18 @@
     <ClInclude Include="HOTELManagementDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RoomInfo.h">
+      <Filter>Source Files\RoomInfo</Filter>
+    </ClInclude>
+    <ClInclude Include="DatabaseAppication.h">
+      <Filter>Source Files\DatabaseManagement</Filter>
+    </ClInclude>
+    <ClInclude Include="ListRoomsInformationDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SpecificRoomInformationDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -68,17 +77,11 @@
     <ClCompile Include="RegisterDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AccountInformationDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Util.cpp">
       <Filter>Source Files\Util</Filter>
     </ClCompile>
     <ClCompile Include="AcInfo.cpp">
       <Filter>Source Files\AcInfo</Filter>
-    </ClCompile>
-    <ClCompile Include="AccountInfo.cpp">
-      <Filter>Source Files\AccountInfo</Filter>
     </ClCompile>
     <ClCompile Include="StoragePathDlg.cpp">
       <Filter>Source Files</Filter>
@@ -87,6 +90,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="HOTELManagement.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DatabaseAppication.cpp">
+      <Filter>Source Files\DatabaseManagement</Filter>
+    </ClCompile>
+    <ClCompile Include="RoomInfo.cpp">
+      <Filter>Source Files\RoomInfo</Filter>
+    </ClCompile>
+    <ClCompile Include="ListRoomsInformationDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SpecificRoomInformationDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -104,5 +119,6 @@
     <None Include="res\HOTELManagement.rc2">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

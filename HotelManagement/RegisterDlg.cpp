@@ -33,6 +33,7 @@ void RegisterDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(RegisterDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_APPROVE, &RegisterDlg::OnBnClickedBtnApprove)
+	ON_EN_CHANGE(IDC_EDIT_USERNAME_REGISTER, &RegisterDlg::OnEnChangeEditUsernameRegister)
 END_MESSAGE_MAP()
 
 
@@ -104,3 +105,14 @@ void RegisterDlg::OnBnClickedBtnApprove()
 }
 
 
+
+
+void RegisterDlg::OnEnChangeEditUsernameRegister()
+{
+	// TODO:  If this is a RICHEDIT control, the control will not
+	// send this notification unless you override the CDialogEx::OnInitDialog()
+	// function and call CRichEditCtrl().SetEventMask()
+	// with the ENM_CHANGE flag ORed into the mask.
+
+	// TODO:  Add your control notification handler code here
+}

@@ -8,15 +8,19 @@
 #include "afxdialogex.h"
 #include "RegisterDlg.h"	
 #include "Util.h"	
-#include "AccountInformationDlg.h"
-#include "AccountInfo.h"
+#include "ListRoomsInformationDlg.h"
+#include "RoomInfo.h"
+#include <vector>
+#include <tuple>
+#include "DatabaseAppication.h"
+#include "SpecificRoomInformationDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
-
 // CAboutDlg dialog used for App About
+
 
 class CAboutDlg : public CDialogEx
 {
@@ -59,7 +63,6 @@ void HOTELManagementDlg::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_EDIT_USERNAME_LOGIN, edit_username);
 	DDX_Control(pDX, IDC_EDIT_PASSWORD_LOGIN, edit_password);
-	DDX_Control(pDX, IDC_LIST_DATA, list_data);
 }
 
 BEGIN_MESSAGE_MAP(HOTELManagementDlg, CDialogEx)
@@ -171,74 +174,30 @@ void HOTELManagementDlg::OnBnClickedBtnLogin()
 	bool isLoginOk = false;
 	bool isExistedAccount = true;
 
-	if (p_ac_info != NULL)
-	{
-		CString str_user(p_ac_info->get_user_name().c_str());
-		CString str_pass(p_ac_info->get_pass().c_str());
+	// get username and password from register table
+	std::vector<std::vector<CString>> lstData;
+	DatabaseAppication::getInstance()->SelectDataFromDB(L"register", lstData);
 
-		if (us_login.CompareNoCase(str_user) == 0)
+	// compare with data is input from GUI
+	for (std::vector<std::vector<CString>>::iterator it = lstData.begin(); it != lstData.end(); ++it)
+	{
+		std::vector<CString> tmp = *it;
+		if (tmp[1].Trim().Compare(us_login) == 0 && tmp[2].Trim().Compare(pass_login) == 0)
 		{
-			if (pass_login.Compare(str_pass) == 0)
-			{
-				isLoginOk = true;
-			}
+			isLoginOk = true;
+			break;
 		}
 	}
-	else
-	{
-		std::string st_local_path = BasicUtil::CreatePathFileForAccount();
-		std::vector<std::string> data_list = BasicUtil::ReadFileAc(st_local_path);
-		if (data_list.empty())
-		{
-			MessageBox(_T("Account is not existed! Please register."), _T("Info"), MB_OK | MB_ICONWARNING);
-			isExistedAccount = false;
-		}
-		else
-		{
-			p_ac_info = new AcInfomation();
-			if (data_list.size() >= 2)
-			{
-				CString str_user(data_list.front().c_str());
-				CString str_pass(data_list.at(1).c_str());
-				
-				p_ac_info->set_user(data_list.front());
-				p_ac_info->set_pass(data_list.at(1));
-				if (data_list.size() >= 3)
-				{
-					p_ac_info->set_path(data_list.at(2));
-				}
-
-				if (us_login.CompareNoCase(str_user) == 0)
-				{
-					if (pass_login.Compare(str_pass) == 0)
-					{
-						isLoginOk = true;
-					}
-				}
-			}
-		}
-	}
+	// if yes, go to main monitor
 	if (isLoginOk)
 	{
-		AccountInformationDlg aci_dlg;
+		ListRoomsInformationDlg aci_dlg;
 		std::string user_mng = CStringA(us_login);
 		aci_dlg.set_account_mng(user_mng);
-		aci_dlg.set_store_path(p_ac_info->get_path());
-	
 		if (aci_dlg.DoModal() == IDOK)
 		{
-			std::string str_path = aci_dlg.get_store_path();
-			if (str_path.compare(p_ac_info->get_path()) != 0)
-			{
-				p_ac_info->set_path(str_path);
-				std::vector<std::string> data_list;
-				data_list.push_back(p_ac_info->get_user_name());
-				data_list.push_back(p_ac_info->get_pass());
-				data_list.push_back(str_path);
-				// create file ACM.acc
-				std::string str_local_path = BasicUtil::CreatePathFileForAccount();
-				BasicUtil::WriteFile(str_local_path, data_list);
-			}
+		
+
 		}
 	}
 	else
@@ -266,50 +225,15 @@ void HOTELManagementDlg::OnBnClickedBtnRegister()
 			std::string strPass = CStringA(str_pass);
 			CString query = L"insert into register values('";
 			query += str_staffID + L"','" + str_user + L"','" + str_pass  + L"')";
-			MessageBox(query);
-			database.ExecuteSQL(query);
-			int x;
+			MessageBox(query);		
+			DatabaseAppication::getInstance()->ExecuteQuery(query);
 		}
 	}
 }
 
 void HOTELManagementDlg::InitGUI()
 {
-
-	ConnectDB();
-}
-
-void HOTELManagementDlg::ConnectDB()
-{
-	if (database.IsOpen())
-	{
-		MessageBox(_T("The database has been connected to applicaiton"));
-	}
-	connection = _T("Driver={SQL Server Native Client 11.0};Server=IPHONE-6-PLUS\\SQLSERVER2014;Database=TestManagement;Trusted_Connection=Yes;Uid=sa;Pwd=12345678;");
-	if (database.OpenEx(connection, CDatabase::useCursorLib))
-	{
-		//MessageBox(_T("Connected database successfully"));
-		CString query = L"Select * from register";
-		
-		CRecordset recordset(&database);
-		CString temp, record;
-		recordset.Open(CRecordset::forwardOnly, query, CRecordset::readOnly);
-		while (!recordset.IsEOF())
-		{
-			record = _T("");
-			int len = recordset.GetODBCFieldCount();
-			for (int i = 0	; i < len; i++)
-			{
-				recordset.GetFieldValue(i, temp);
-				record += temp + _T(" | ");
-			}
-			list_data.AddString(record);
-			recordset.MoveNext();
-		}
-
-		UpdateData(false);
-	}
-
+	DatabaseAppication::getInstance()->ConnectDB();
 }
 
 

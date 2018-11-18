@@ -99,7 +99,7 @@ std::string BasicUtil::CreatePathFileForAccount()
 	return str_local_path;
 }
 
-std::string BasicUtil::CreatePathfileAccountInfo(const std::string& str_file)
+std::string BasicUtil::CreatePathfileRoomInfo(const std::string& str_file)
 {
 	std::string str_local_path = GetLocalPathFolder();
 	str_local_path += "\\ACManagement";
@@ -140,11 +140,5 @@ unsigned int BasicUtil::SplitString(const std::string &str_input,
 	std::string last_sub = str_input.substr(init_pos, idex - init_pos + 1);
 	ret_list.push_back(last_sub);
 	return ret_list.size();
-}
-
-
-void BasicUtil::ExecuteQuery(CDatabase database, CString query)
-{
-	database.ExecuteSQL(query);
 }
 

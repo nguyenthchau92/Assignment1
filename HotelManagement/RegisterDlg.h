@@ -43,5 +43,7 @@ protected:
 	CString str_reg_pass;
 	CString str_staffid;
 	
+public:
+	afx_msg void OnEnChangeEditUsernameRegister();
 };
 
