@@ -8,12 +8,13 @@
 #include "afxdialogex.h"
 #include "RegisterDlg.h"	
 #include "Util.h"	
-#include "ListRoomsInformationDlg.h"
+#include "ListRoomsInformationDlg_bkg.h"
 #include "RoomInfo.h"
 #include <vector>
 #include <tuple>
 #include "DatabaseAppication.h"
 #include "SpecificRoomInformationDlg.h"
+#include "RoomsInformationDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -109,8 +110,6 @@ BOOL HOTELManagementDlg::OnInitDialog()
 	// create an connection to database
 	InitGUI();
 
-
-
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -176,13 +175,13 @@ void HOTELManagementDlg::OnBnClickedBtnLogin()
 
 	// get username and password from register table
 	std::vector<std::vector<CString>> lstData;
-	DatabaseAppication::getInstance()->SelectDataFromDB(L"register", lstData);
+	DatabaseAppication::getInstance()->ExecuteQuerySelect(L"register", lstData);
 
 	// compare with data is input from GUI
 	for (std::vector<std::vector<CString>>::iterator it = lstData.begin(); it != lstData.end(); ++it)
 	{
 		std::vector<CString> tmp = *it;
-		if (tmp[1].Trim().Compare(us_login) == 0 && tmp[2].Trim().Compare(pass_login) == 0)
+		if (tmp[0].Trim().Compare(us_login) == 0 && tmp[1].Trim().Compare(pass_login) == 0)
 		{
 			isLoginOk = true;
 			break;
@@ -191,10 +190,22 @@ void HOTELManagementDlg::OnBnClickedBtnLogin()
 	// if yes, go to main monitor
 	if (isLoginOk)
 	{
-		ListRoomsInformationDlg aci_dlg;
-		std::string user_mng = CStringA(us_login);
-		aci_dlg.set_account_mng(user_mng);
-		if (aci_dlg.DoModal() == IDOK)
+		RoomsInformationDlg roomInfo_dlg;
+		// find staffid based on us_login
+		std::vector<std::vector<CString>> lstData;
+		DatabaseAppication::getInstance()->ExecuteQuerySelect(L"register", lstData);
+		// compare with data is input from GUI
+		for (int i = 0; i < lstData.size(); i++)
+		{
+			std::vector<CString> tmp = lstData[i];
+			if (tmp[0].Trim().Compare(us_login) == 0 )
+			{
+				roomInfo_dlg.setStaffID(tmp[2].Trim());
+				break;
+			}
+		}
+
+		if (roomInfo_dlg.DoModal() == IDOK)
 		{
 		
 
@@ -224,7 +235,7 @@ void HOTELManagementDlg::OnBnClickedBtnRegister()
 			std::string strUser = CStringA(str_user);
 			std::string strPass = CStringA(str_pass);
 			CString query = L"insert into register values('";
-			query += str_staffID + L"','" + str_user + L"','" + str_pass  + L"')";
+			query += str_user + L"','" + str_pass + L"','" + str_staffID + L"')";
 			MessageBox(query);		
 			DatabaseAppication::getInstance()->ExecuteQuery(query);
 		}

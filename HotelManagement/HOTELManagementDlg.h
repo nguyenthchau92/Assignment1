@@ -28,7 +28,6 @@ public:
 
 	void InitGUI();
 	
-	//void SelectDataFromDB(CString nameTable, std::vector<std::vector<CString>> &lstData);
 protected:
 	HICON m_hIcon;
 
