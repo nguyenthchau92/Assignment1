@@ -4,6 +4,13 @@
 #include <vector>
 #include <afxdb.h>
 
+
+typedef enum DataType
+{
+	STRING = 0,
+	INTEGER
+};
+
 namespace BasicUtil
 {
 	std::string GetTempPathFolder();
