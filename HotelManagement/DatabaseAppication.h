@@ -4,6 +4,8 @@
 
 #include <afxdb.h>
 #include <vector>
+#include <map>
+#include "Util.h"
 
 class DatabaseAppication
 {
@@ -20,7 +22,10 @@ public:
 
 	void ConnectDB();
 	void ExecuteQuery(CString query);
-	void SelectDataFromDB(CString nameTable, std::vector<std::vector<CString>> &lstData);
+	void ExecuteQuerySelect(CString nameTable, std::vector<std::vector<CString>> &lstData);
+	void ExecuteQueryInsert(CString nameTable, std::vector<std::pair<DataType, CString>> listData);
+	void ExecuteQueryUpdate(CString nameTable, std::map<CString, std::pair<DataType, CString>> listData, 
+		std::map<CString, std::pair<DataType, CString>> listCondition);
 };
 
 #endif
