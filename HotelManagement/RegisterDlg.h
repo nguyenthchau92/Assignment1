@@ -45,5 +45,6 @@ protected:
 	
 public:
 	afx_msg void OnEnChangeEditUsernameRegister();
+	afx_msg void OnBnClickedOk();
 };
 

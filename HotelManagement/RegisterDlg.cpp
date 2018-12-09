@@ -34,6 +34,7 @@ void RegisterDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(RegisterDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_APPROVE, &RegisterDlg::OnBnClickedBtnApprove)
 	ON_EN_CHANGE(IDC_EDIT_USERNAME_REGISTER, &RegisterDlg::OnEnChangeEditUsernameRegister)
+	ON_BN_CLICKED(IDOK, &RegisterDlg::OnBnClickedOk)
 END_MESSAGE_MAP()
 
 
@@ -115,4 +116,11 @@ void RegisterDlg::OnEnChangeEditUsernameRegister()
 	// with the ENM_CHANGE flag ORed into the mask.
 
 	// TODO:  Add your control notification handler code here
+}
+
+
+void RegisterDlg::OnBnClickedOk()
+{
+	// TODO: Add your control notification handler code here
+	CDialogEx::OnOK();
 }

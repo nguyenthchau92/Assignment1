@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "DatabaseAppication.h"
 
-
 DatabaseAppication * DatabaseAppication::instance = NULL;
 
 DatabaseAppication::DatabaseAppication()
@@ -30,6 +29,24 @@ DatabaseAppication* DatabaseAppication::getInstance()
 	if (instance == NULL)
 		instance = new DatabaseAppication;
 	return instance;
+}
+
+void DatabaseAppication::ExecuteQuerySelectWithCondition(CString nameTable, CString condition, std::vector<CString> &lstData)
+{
+	CString query = L"select * from " + nameTable + L" where " + condition;
+	//MessageBox(NULL, query, L"", 0);
+	CRecordset recordset(&database);
+	CString temp;
+	recordset.Open(CRecordset::forwardOnly, query, CRecordset::readOnly);
+	if(!recordset.IsEOF())
+	{
+		int len = recordset.GetODBCFieldCount();
+		for (int i = 0; i < len; i++)
+		{
+			recordset.GetFieldValue(i, temp);
+			lstData.push_back(temp);
+		}
+	}
 }
 
 void DatabaseAppication::ExecuteQuerySelect(CString nameTable, std::vector<std::vector<CString>> &lstData)

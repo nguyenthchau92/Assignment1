@@ -5,7 +5,8 @@
 #include "SpecificRoomInformationDlg.h"
 #include "afxdialogex.h"
 #include "DatabaseAppication.h"
-
+#include "InvoiceInformationDlg.h"
+#include "Util.h"
 
 // SpecificRoomInformationDlg dialog
 
@@ -36,49 +37,110 @@ BOOL SpecificRoomInformationDlg::OnInitDialog()
 		}
 	}
 
-	combox_sex.AddString(L"Male");
+	listctrl_food.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
+	listctrl_food.InsertColumn(0, L"Name Food", LVCFMT_LEFT, 400);
+
+	// clear old data
+	listctrl_food.DeleteAllItems();
+	
 	combox_sex.AddString(L"Female");
-	combox_sex.SetCurSel(0);
+	combox_sex.AddString(L"Male");
+	combox_sex.SetCurSel(1);
+
+	// create data for combo box food
+	std::vector<std::vector<CString>> lstData;
+	DatabaseAppication::getInstance()->ExecuteQuerySelect(L"FOOD", lstData);
+	for (size_t i = 0; i < lstData.size(); i++)
+	{
+		std::vector<CString> tmp = lstData[i];
+		combo_food.AddString(tmp[0]);
+	}
+	combo_food.SetCurSel(0);
 
 	if (isRented)
 	{
 		//1.2 For view information room
-			//- If status room is not empty, I will get data from database(RentedRoom, Room) based on roomID
-		// get data from database into diaglog
-		//Name
-		CString cs_nameCustomer;
-		CString cs_idCustomer;
-		CString cs_checkin;
-		CString cs_checkout;
-
-		// ID
-		CString nameTable = L"renting";
-		std::vector<std::vector<CString>> lstData;
-		DatabaseAppication::getInstance()->ExecuteQuerySelect(nameTable, lstData);
-
-
-		//Price per day
-
-		// checkin day
-
-		// checkout day
+		//- If status room is not empty, get data from database(RentedRoom, Reservation) based on roomID
+		std::vector<std::vector<CString>> lstRentedData;
+		CString condition = L"ROOMID='" + this->roomID + L"'";
+		DatabaseAppication::getInstance()->ExecuteQuerySelect(L"RENTEDROOM", lstRentedData);
+		for (size_t i = 0; i < lstRentedData.size(); i++)
+		{
+			std::vector<CString> temp = lstRentedData[i];
+			// find a row with same roomID
+			if (this->roomID.Compare(temp[2].Trim()) == 0)
+			{
+				serviceID = temp[0].Trim();
+				std::vector<CString> reservationData;
+				CString condition = L"SERVICEID='" + serviceID + L"'";
+				DatabaseAppication::getInstance()->ExecuteQuerySelectWithCondition(L"RESERVATION", condition, reservationData);
+				if (reservationData.size() > 0 && reservationData[2].Trim() == L"0")
+				{
+					g_customerID = reservationData[1].Trim();
+					g_checkinDate = temp[3].Trim();
+					g_checkoutdate = temp[4].Trim();
+					// find user's information in customer table
+					std::vector<CString> customerData;
+					CString conditionCus = L"IDENTIFICATION='" + g_customerID + L"'";
+					DatabaseAppication::getInstance()->ExecuteQuerySelectWithCondition(L"CUSTOMER", conditionCus, customerData);
+					CString gender = customerData[1].Trim();
+					CString address = customerData[2].Trim();
+					CString age = customerData[3].Trim();
+					CString name = customerData[4].Trim();
+					edit_name_customer.SetWindowText(name);
+					edit_id_customer.SetWindowText(g_customerID);
+					// update sex
+					if (gender == L"1")
+						combox_sex.SetCurSel(1);
+					else
+						combox_sex.SetCurSel(0);
+					// update checkin to gui
+					SYSTEMTIME checkintime;
+					int ci_year = 0, ci_day = 0, ci_month = 0;
+					memset(&checkintime, 0x00, sizeof(SYSTEMTIME));
+					std::string sCheckinDate = CStringA(g_checkinDate);
+					sCheckinDate = sCheckinDate.substr(0, sCheckinDate.find_first_of(" "));
+					sscanf((char*)sCheckinDate.c_str(), "%d-%d-%d", &ci_year, &ci_month, &ci_day);
+					checkintime.wYear = ci_year;
+					checkintime.wDay = ci_day;
+					checkintime.wMonth = ci_month;
+					datetime_checkin_room.SetTime(checkintime);
+					// update checkout day to gui
+					SYSTEMTIME checkouttime;
+					int co_year = 0, co_day = 0, co_month = 0;
+					memset(&checkouttime, 0x00, sizeof(SYSTEMTIME));
+					std::string sco_Date = CStringA(g_checkoutdate.Trim());
+					sscanf((char*)sco_Date.c_str(), "%d-%d-%d", &co_year, &co_month, &co_day);
+					checkouttime.wYear = co_year;
+					checkouttime.wDay = co_day;
+					checkouttime.wMonth = co_month;
+					datetime_checkout_room.SetTime(checkouttime);
+					// update age and address to gui
+					edit_age.SetWindowText(age);
+					edit_address.SetWindowText(address);
+					// Insert to table USINGFOOD
+					std::vector<std::vector<CString>> foodData;
+					DatabaseAppication::getInstance()->ExecuteQuerySelect(L"USINGFOOD", foodData);
+					for (size_t i = 0; i < foodData.size(); i++)
+					{
+						std::vector<CString> tmp = foodData[i];
+						if (tmp[0].Trim().Compare(serviceID) == 0)
+							listctrl_food.InsertItem(i, tmp[2].Trim());
+					}
+					break;
+				}
+			}
+		}
 	}
 	
-
-
-
 	// update data to gui
 	UpdateData(false);
-
-
-
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
 SpecificRoomInformationDlg::SpecificRoomInformationDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(SpecificRoomInformationDlg::IDD, pParent)
 {
-	isRented = false;
 }
 
 SpecificRoomInformationDlg::~SpecificRoomInformationDlg()
@@ -95,12 +157,15 @@ void SpecificRoomInformationDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO_SEX, combox_sex);
 	DDX_Control(pDX, IDC_EDIT_AGE, edit_age);
 	DDX_Control(pDX, IDC_EDIT_ADDRESS, edit_address);
+	DDX_Control(pDX, IDC_COMBO_FOOD, combo_food);
+	DDX_Control(pDX, IDC_LIST_FOOD, listctrl_food);
 }
 
 
 BEGIN_MESSAGE_MAP(SpecificRoomInformationDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_ADD, &SpecificRoomInformationDlg::OnBnClickedBtnAdd)
 	ON_BN_CLICKED(IDOK, &SpecificRoomInformationDlg::OnBnClickedOk)
+	ON_BN_CLICKED(IDC_BUTTON_PAYMENT, &SpecificRoomInformationDlg::OnBnClickedButtonPayment)
 END_MESSAGE_MAP()
 
 
@@ -109,14 +174,11 @@ END_MESSAGE_MAP()
 
 void SpecificRoomInformationDlg::OnBnClickedBtnAdd()
 {
-
-
-
-
-
-
-
-
+	int cur = combo_food.GetCurSel();
+	CString foodName;
+	combo_food.GetLBText(cur, foodName);
+	listctrl_food.InsertItem(0, foodName.Trim());
+	this->lstFood.push_back(foodName);
 }
 
 void SpecificRoomInformationDlg::OnBnClickedOk()
@@ -124,17 +186,16 @@ void SpecificRoomInformationDlg::OnBnClickedOk()
 	if (!isRented)
 	{
 		// 1.1 For renting room
-		//  Get data from GUI(userID, date, ...)
-		CString g_name, g_id, g_sex, g_checkin, g_checkout, g_age, g_address;
+		//  Get data from GUI (userID, date, ...)
+		CString g_sex, g_checkin, g_age, g_address;
 		edit_name_customer.GetWindowText(g_name);
-		edit_id_customer.GetWindowText(g_id);
+		edit_id_customer.GetWindowText(g_customerID);
 		combox_sex.GetLBText(combox_sex.GetCurSel(), g_sex);
 		int iSex = _tstof(g_sex);
 		if (iSex)
 			g_sex = L"True";
 		else
 			g_sex = L"False";
-
 		// get checkin and checkout day
 		CString checkinDate, checkoutDate;
 		CTime ctiDate, ctoDate;
@@ -147,48 +208,122 @@ void SpecificRoomInformationDlg::OnBnClickedOk()
 		datetime_checkout_room.GetTime(ctoDate);
 		ctoDate.GetDay();
 		checkoutDate.Format(L"%d-%d-%d", ctoDate.GetYear(), ctoDate.GetMonth(), ctoDate.GetDay());
+		//TODO: random algorithm + create a serviceID by current time
+		auto timeNow = std::chrono::system_clock::now();
+		auto duration = timeNow.time_since_epoch();
+		typedef std::chrono::duration<long double> MySecondTick;
+		this->serviceID.Format(L"%s%ld", L"service", duration.count());
+		// update table Customer
+		{
+			std::vector<CString> customerData;
+			CString condition = L"IDENTIFICATION='" + g_customerID + L"'";
+			DatabaseAppication::getInstance()->ExecuteQuerySelectWithCondition(L"CUSTOMER", condition, customerData);
+			if (customerData.size() > 0)
+			{
+				// Update status Room table is rented
+				std::map<CString, std::pair<DataType, CString>> listData;
+				listData[L"CUSAGE"] = std::make_pair(INTEGER, g_age);
+				listData[L"CUSADDRESS"] = std::make_pair(STRING, g_address);
+				std::map<CString, std::pair<DataType, CString>> listCondition;
+				listCondition[L"IDENTIFICATION"] = std::make_pair(STRING, g_customerID);
+				DatabaseAppication::getInstance()->ExecuteQueryUpdate(L"CUSTOMER", listData, listCondition);
+			}
+			else
+			{
+				std::vector<std::pair<DataType, CString>> lstField;
+				lstField.push_back(std::make_pair(STRING, g_customerID));
+				lstField.push_back(std::make_pair(STRING, g_sex));
+				lstField.push_back(std::make_pair(STRING, g_address));
+				lstField.push_back(std::make_pair(INTEGER, g_age));
+				lstField.push_back(std::make_pair(STRING, g_name));
+				DatabaseAppication::getInstance()->ExecuteQueryInsert(L"CUSTOMER", lstField);
+			}
+		}
 
-		// Create a serviceID
-		counterService ++;
-		CString serviceID;
-		serviceID.Format(L"%s%d",  L"service" ,counterService);
-		
-		// Update table Customer
-		std::vector<std::pair<DataType, CString>> lstField;
-		lstField.push_back(std::make_pair(STRING, g_id));
-		lstField.push_back(std::make_pair(STRING, g_sex));
-		lstField.push_back(std::make_pair(STRING, g_address));
-		lstField.push_back(std::make_pair(INTEGER, g_age));
-		lstField.push_back(std::make_pair(STRING, g_name));
-		DatabaseAppication::getInstance()->ExecuteQueryInsert(L"CUSTOMER", lstField);
-
-		// Update reservation table
+		// update reservation table
 		std::vector<std::pair<DataType, CString>> lstReservationField;
- 		lstReservationField.push_back(std::make_pair(STRING, serviceID));
-		lstReservationField.push_back(std::make_pair(STRING, g_id));
+ 		lstReservationField.push_back(std::make_pair(STRING, this->serviceID));
+		lstReservationField.push_back(std::make_pair(STRING, g_customerID));
 		lstReservationField.push_back(std::make_pair(STRING, L"False"));
-		lstReservationField.push_back(std::make_pair(STRING, checkinDate));
-		lstReservationField.push_back(std::make_pair(STRING, checkoutDate));
-		DatabaseAppication::getInstance()->ExecuteQueryInsert(L"RESERVAION", lstReservationField);
-		
+		DatabaseAppication::getInstance()->ExecuteQueryInsert(L"RESERVATION", lstReservationField);
 		// RentedRoom
 		std::vector<std::pair<DataType, CString>> lstRentedRoomField;
 		lstRentedRoomField.push_back(std::make_pair(STRING, serviceID));
 		lstRentedRoomField.push_back(std::make_pair(STRING, staffID));
 		lstRentedRoomField.push_back(std::make_pair(STRING, roomID));
+		lstRentedRoomField.push_back(std::make_pair(STRING, checkinDate));
+		lstRentedRoomField.push_back(std::make_pair(STRING, checkoutDate));
 		DatabaseAppication::getInstance()->ExecuteQueryInsert(L"RENTEDROOM", lstRentedRoomField);
-
 		// Update status Room table is rented
 		std::map<CString, std::pair<DataType, CString>> listData;
 		listData[L"STATUS"] = std::make_pair(STRING, L"True");
 		std::map<CString, std::pair<DataType, CString>> listCondition;
-		listCondition[L"ROOMID"] = std::make_pair(STRING, roomID);
+		listCondition[L"ROOMID"] = std::make_pair(INTEGER, roomID);
 		DatabaseAppication::getInstance()->ExecuteQueryUpdate(L"ROOM", listData, listCondition);
-
-		// RentedFood
-
+		// Insert to table FOODORDER
+		std::vector<std::pair<DataType, CString>> lstOrder;
+		lstOrder.push_back(std::make_pair(STRING, this->serviceID));
+		lstOrder.push_back(std::make_pair(STRING, this->g_customerID));
+		lstOrder.push_back(std::make_pair(STRING, L"False"));
+		DatabaseAppication::getInstance()->ExecuteQueryInsert(L"FOODORDER", lstOrder);
+		for (size_t i = 0; i < lstFood.size(); i++)
+		{
+			// Insert to table USINGFOOD
+			std::vector<std::pair<DataType, CString>> lstField;
+			lstField.push_back(std::make_pair(STRING, this->serviceID));
+			lstField.push_back(std::make_pair(STRING, this->staffID));
+			lstField.push_back(std::make_pair(STRING, lstFood[i]));
+			lstField.push_back(std::make_pair(STRING, checkinDate));
+			DatabaseAppication::getInstance()->ExecuteQueryInsert(L"USINGFOOD", lstField);
+		}
 		// Get price from room table
 	}
-	// TODO: Add your control notification handler code here
 	CDialogEx::OnOK();
+}
+
+
+void SpecificRoomInformationDlg::OnBnClickedButtonPayment()
+{
+	InvoiceInformationDlg invoice;
+	invoice.setIdentification(g_customerID);
+	invoice.setServiceID(serviceID);
+	invoice.setStaffID(staffID);
+	invoice.setRoomID(roomID);
+	invoice.setTimeInvoice(g_checkoutdate);
+	//g_checkinDate
+
+	// calculator num of rented day
+	// update time
+	SYSTEMTIME checkinTime;
+	int ci_year = 0, ci_day = 0, ci_month = 0;
+	memset(&checkinTime, 0x00, sizeof(SYSTEMTIME));
+	std::string sCheckinTime = CStringA(g_checkinDate);
+	sCheckinTime = sCheckinTime.substr(0, sCheckinTime.find_first_of(" "));
+	sscanf((char*)sCheckinTime.c_str(), "%d-%d-%d", &ci_year, &ci_month, &ci_day);
+	checkinTime.wYear = ci_year;
+	checkinTime.wDay = ci_day;
+	checkinTime.wMonth = ci_month;
+
+	SYSTEMTIME checkoutTime;
+	int co_year = 0, co_day = 0, co_month = 0;
+	memset(&checkoutTime, 0x00, sizeof(SYSTEMTIME));
+	std::string sCheckoutTime = CStringA(g_checkoutdate);
+	sCheckoutTime = sCheckoutTime.substr(0, sCheckoutTime.find_first_of(" "));
+	sscanf((char*)sCheckoutTime.c_str(), "%d-%d-%d", &co_year, &co_month, &co_day);
+	checkoutTime.wYear = co_year;
+	checkoutTime.wDay = co_day;
+	checkoutTime.wMonth = co_month;
+
+	int numOfDay = co_day - ci_day;
+	invoice.setNumDay(numOfDay);
+
+	if (invoice.DoModal() == IDOK)
+	{
+		// go to invoice monitor
+		CDialogEx::OnOK();
+
+	}
+
+	
+
 }

@@ -2,6 +2,9 @@
 #include "afxwin.h"
 #include "resource.h"
 #include "afxdtctl.h"
+#include "afxcmn.h"
+#include <vector>
+#include <chrono>
 
 // SpecificRoomInformationDlg dialog
 
@@ -34,6 +37,12 @@ protected:
 	CEdit edit_address;
 	CString roomID;
 	CString staffID;
+	CString serviceID;
+	CString g_customerID;
+	CString g_name;
+	CString g_checkinDate;
+	CString g_checkoutdate;
+	std::vector<CString> lstFood;
 public:
 	static int counterService;
 public:
@@ -41,4 +50,10 @@ public:
 public: 
 	void setRoomID(CString roomID) { this->roomID = roomID; };
 	void setStaffID(CString staffID) { this->staffID = staffID; };
+	void setIsRented(bool isRented) { this->isRented = isRented; };
+protected:
+	CComboBox combo_food;
+	CListCtrl listctrl_food;
+public:
+	afx_msg void OnBnClickedButtonPayment();
 };

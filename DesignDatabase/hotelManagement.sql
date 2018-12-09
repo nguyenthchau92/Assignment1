@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      Microsoft SQL Server 2008                    */
-/* Created on:     12/2/2018 11:09:00 PM                        */
+/* Created on:     12/8/2018 9:40:44 AM                         */
 /*==============================================================*/
 
 
@@ -41,6 +41,13 @@ go
 
 if exists (select 1
    from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
+   where r.fkeyid = object_id('FOODORDER') and o.name = 'FK_FOODORDE_CUSTOMER__CUSTOMER')
+alter table FOODORDER
+   drop constraint FK_FOODORDE_CUSTOMER__CUSTOMER
+go
+
+if exists (select 1
+   from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
    where r.fkeyid = object_id('INVOICE') and o.name = 'FK_INVOICE_CUSTOMER__CUSTOMER')
 alter table INVOICE
    drop constraint FK_INVOICE_CUSTOMER__CUSTOMER
@@ -55,16 +62,16 @@ go
 
 if exists (select 1
    from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
-   where r.fkeyid = object_id('INVOICE') and o.name = 'FK_INVOICE_INVOICE_S_ORDER')
+   where r.fkeyid = object_id('INVOICE') and o.name = 'FK_INVOICE_INVOICE_S_FOODORDE')
 alter table INVOICE
-   drop constraint FK_INVOICE_INVOICE_S_ORDER
+   drop constraint FK_INVOICE_INVOICE_S_FOODORDE
 go
 
 if exists (select 1
    from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
-   where r.fkeyid = object_id('INVOICE') and o.name = 'FK_INVOICE_INVOICE_S_RESERVAI')
+   where r.fkeyid = object_id('INVOICE') and o.name = 'FK_INVOICE_INVOICE_S_RESERVAT')
 alter table INVOICE
-   drop constraint FK_INVOICE_INVOICE_S_RESERVAI
+   drop constraint FK_INVOICE_INVOICE_S_RESERVAT
 go
 
 if exists (select 1
@@ -72,13 +79,6 @@ if exists (select 1
    where r.fkeyid = object_id('OPERATINGCOST') and o.name = 'FK_OPERATIN_BRANCH_OP_BRANCH')
 alter table OPERATINGCOST
    drop constraint FK_OPERATIN_BRANCH_OP_BRANCH
-go
-
-if exists (select 1
-   from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
-   where r.fkeyid = object_id('"ORDER"') and o.name = 'FK_ORDER_CUSTOMER__CUSTOMER')
-alter table "ORDER"
-   drop constraint FK_ORDER_CUSTOMER__CUSTOMER
 go
 
 if exists (select 1
@@ -111,16 +111,16 @@ go
 
 if exists (select 1
    from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
-   where r.fkeyid = object_id('RENTEDROOM') and o.name = 'FK_RENTEDRO_CONTAIN2_RESERVAI')
+   where r.fkeyid = object_id('RENTEDROOM') and o.name = 'FK_RENTEDRO_CONTAIN2_RESERVAT')
 alter table RENTEDROOM
-   drop constraint FK_RENTEDRO_CONTAIN2_RESERVAI
+   drop constraint FK_RENTEDRO_CONTAIN2_RESERVAT
 go
 
 if exists (select 1
    from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
-   where r.fkeyid = object_id('RESERVAION') and o.name = 'FK_RESERVAI_CUSTOMER__CUSTOMER')
-alter table RESERVAION
-   drop constraint FK_RESERVAI_CUSTOMER__CUSTOMER
+   where r.fkeyid = object_id('RESERVATION') and o.name = 'FK_RESERVAT_CUSTOMER__CUSTOMER')
+alter table RESERVATION
+   drop constraint FK_RESERVAT_CUSTOMER__CUSTOMER
 go
 
 if exists (select 1
@@ -153,9 +153,9 @@ go
 
 if exists (select 1
    from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
-   where r.fkeyid = object_id('USINGFOOD') and o.name = 'FK_USINGFOO_CONTAIN3_ORDER')
+   where r.fkeyid = object_id('USINGFOOD') and o.name = 'FK_USINGFOO_CONTAIN3_FOODORDE')
 alter table USINGFOOD
-   drop constraint FK_USINGFOO_CONTAIN3_ORDER
+   drop constraint FK_USINGFOO_CONTAIN3_FOODORDE
 go
 
 if exists (select 1
@@ -236,6 +236,22 @@ go
 
 if exists (select 1
             from  sysindexes
+           where  id    = object_id('FOODORDER')
+            and   name  = 'CUSTOMER_SERVICE_FK'
+            and   indid > 0
+            and   indid < 255)
+   drop index FOODORDER.CUSTOMER_SERVICE_FK
+go
+
+if exists (select 1
+            from  sysobjects
+           where  id = object_id('FOODORDER')
+            and   type = 'U')
+   drop table FOODORDER
+go
+
+if exists (select 1
+            from  sysindexes
            where  id    = object_id('INVOICE')
             and   name  = 'INVOICE_SERVICE2_FK'
             and   indid > 0
@@ -282,22 +298,6 @@ if exists (select 1
            where  id = object_id('OPERATINGCOST')
             and   type = 'U')
    drop table OPERATINGCOST
-go
-
-if exists (select 1
-            from  sysindexes
-           where  id    = object_id('"ORDER"')
-            and   name  = 'CUSTOMER_SERVICE_FK'
-            and   indid > 0
-            and   indid < 255)
-   drop index "ORDER".CUSTOMER_SERVICE_FK
-go
-
-if exists (select 1
-            from  sysobjects
-           where  id = object_id('"ORDER"')
-            and   type = 'U')
-   drop table "ORDER"
 go
 
 if exists (select 1
@@ -359,18 +359,18 @@ go
 
 if exists (select 1
             from  sysindexes
-           where  id    = object_id('RESERVAION')
+           where  id    = object_id('RESERVATION')
             and   name  = 'CUSTOMER_SERVICE2_FK'
             and   indid > 0
             and   indid < 255)
-   drop index RESERVAION.CUSTOMER_SERVICE2_FK
+   drop index RESERVATION.CUSTOMER_SERVICE2_FK
 go
 
 if exists (select 1
             from  sysobjects
-           where  id = object_id('RESERVAION')
+           where  id = object_id('RESERVATION')
             and   type = 'U')
-   drop table RESERVAION
+   drop table RESERVATION
 go
 
 if exists (select 1
@@ -466,7 +466,7 @@ go
 create table CHEF (
    STAFFID              char(50)             not null,
    BRANCHID             char(50)             not null,
-   STA_STAFFID          char(50)             not null,
+   MNGID                char(50)             not null,
    ADDRESSSTAFF         char(200)            null,
    NAMESTAFF            char(50)             null,
    AGESTAFF             int                  null,
@@ -484,7 +484,7 @@ go
 create table CLEANER (
    STAFFID              char(50)             not null,
    BRANCHID             char(50)             not null,
-   STA_STAFFID          char(50)             not null,
+   MNGID                char(50)             not null,
    ADDRESSSTAFF         char(200)            null,
    NAMESTAFF            char(50)             null,
    AGESTAFF             int                  null,
@@ -501,8 +501,8 @@ go
 /*==============================================================*/
 create table CLEANER_ROOM (
    STAFFID              char(50)             not null,
-   ROOMNUMBER           int                  not null,
-   constraint PK_CLEANER_ROOM primary key nonclustered (STAFFID, ROOMNUMBER)
+   ROOMDID              int                  not null,
+   constraint PK_CLEANER_ROOM primary key nonclustered (STAFFID, ROOMDID)
 )
 go
 
@@ -518,7 +518,7 @@ go
 /* Index: CLEANER_ROOM_FK                                       */
 /*==============================================================*/
 create index CLEANER_ROOM_FK on CLEANER_ROOM (
-ROOMNUMBER ASC
+ROOMDID ASC
 )
 go
 
@@ -539,13 +539,12 @@ go
 /* Table: FOOD                                                  */
 /*==============================================================*/
 create table FOOD (
-   BARCODE              char(50)             not null,
+   FOODNAME             char(100)            not null,
    STAFFID              char(50)             not null,
    FOODEXPIREDDATE      datetime             null,
    MANUFACTUREDATE      datetime             null,
    FOODCOST             int                  null,
-   FOODNAME             char(100)            null,
-   constraint PK_FOOD primary key nonclustered (BARCODE)
+   constraint PK_FOOD primary key nonclustered (FOODNAME)
 )
 go
 
@@ -554,6 +553,25 @@ go
 /*==============================================================*/
 create index ORDER_CHEF_FK on FOOD (
 STAFFID ASC
+)
+go
+
+/*==============================================================*/
+/* Table: FOODORDER                                             */
+/*==============================================================*/
+create table FOODORDER (
+   SERVICEID            char(30)             not null,
+   IDENTIFICATION       char(50)             not null,
+   PAID                 bit                  null,
+   constraint PK_FOODORDER primary key nonclustered (SERVICEID)
+)
+go
+
+/*==============================================================*/
+/* Index: CUSTOMER_SERVICE_FK                                   */
+/*==============================================================*/
+create index CUSTOMER_SERVICE_FK on FOODORDER (
+IDENTIFICATION ASC
 )
 go
 
@@ -614,31 +632,12 @@ BRANCHID ASC
 go
 
 /*==============================================================*/
-/* Table: "ORDER"                                               */
-/*==============================================================*/
-create table "ORDER" (
-   SERVICEID            char(30)             not null,
-   IDENTIFICATION       char(50)             not null,
-   PAID                 bit                  null,
-   constraint PK_ORDER primary key nonclustered (SERVICEID)
-)
-go
-
-/*==============================================================*/
-/* Index: CUSTOMER_SERVICE_FK                                   */
-/*==============================================================*/
-create index CUSTOMER_SERVICE_FK on "ORDER" (
-IDENTIFICATION ASC
-)
-go
-
-/*==============================================================*/
 /* Table: RECEPTIONIST                                          */
 /*==============================================================*/
 create table RECEPTIONIST (
    STAFFID              char(50)             not null,
    BRANCHID             char(50)             not null,
-   STA_STAFFID          char(50)             not null,
+   MNGID                char(50)             not null,
    ADDRESSSTAFF         char(200)            null,
    NAMESTAFF            char(50)             null,
    AGESTAFF             int                  null,
@@ -655,9 +654,9 @@ go
 /*==============================================================*/
 create table REGISTER (
    USERNAME             char(30)             not null,
-   PASSWORD             char(30)             not null,
    STAFFID              char(50)             not null,
-   constraint PK_REGISTER primary key nonclustered (USERNAME, PASSWORD)
+   PASSWORD             char(30)             null,
+   constraint PK_REGISTER primary key nonclustered (USERNAME)
 )
 go
 
@@ -675,8 +674,10 @@ go
 create table RENTEDROOM (
    SERVICEID            char(30)             not null,
    STAFFID              char(50)             not null,
-   ROOMNUMBER           int                  not null,
-   constraint PK_RENTEDROOM primary key nonclustered (SERVICEID, STAFFID, ROOMNUMBER)
+   ROOMDID              int                  not null,
+   CHECKINDATE          datetime             null,
+   CHECKOUTDATE         datetime             null,
+   constraint PK_RENTEDROOM primary key nonclustered (SERVICEID, STAFFID, ROOMDID)
 )
 go
 
@@ -700,27 +701,25 @@ go
 /* Index: ASSIGNED_TO_FK                                        */
 /*==============================================================*/
 create index ASSIGNED_TO_FK on RENTEDROOM (
-ROOMNUMBER ASC
+ROOMDID ASC
 )
 go
 
 /*==============================================================*/
-/* Table: RESERVAION                                            */
+/* Table: RESERVATION                                           */
 /*==============================================================*/
-create table RESERVAION (
+create table RESERVATION (
    SERVICEID            char(30)             not null,
    IDENTIFICATION       char(50)             not null,
    PAID                 bit                  null,
-   CHECKINDATE          datetime             null,
-   CHECKOUTDAT          datetime             null,
-   constraint PK_RESERVAION primary key nonclustered (SERVICEID)
+   constraint PK_RESERVATION primary key nonclustered (SERVICEID)
 )
 go
 
 /*==============================================================*/
 /* Index: CUSTOMER_SERVICE2_FK                                  */
 /*==============================================================*/
-create index CUSTOMER_SERVICE2_FK on RESERVAION (
+create index CUSTOMER_SERVICE2_FK on RESERVATION (
 IDENTIFICATION ASC
 )
 go
@@ -729,13 +728,14 @@ go
 /* Table: ROOM                                                  */
 /*==============================================================*/
 create table ROOM (
-   ROOMNUMBER           int                  not null,
+   ROOMDID              int                  not null,
    BRANCHID             char(50)             not null,
    STATUS               bit                  null,
    ROOMTYPE             char(50)             null,
    MAINTAIN             bit                  null,
    ROOMCOST             int                  null,
-   constraint PK_ROOM primary key nonclustered (ROOMNUMBER)
+   ROOMNUMBER           int                  null,
+   constraint PK_ROOM primary key nonclustered (ROOMDID)
 )
 go
 
@@ -753,7 +753,7 @@ go
 create table STAFF (
    STAFFID              char(50)             not null,
    BRANCHID             char(50)             not null,
-   STA_STAFFID          char(50)             null,
+   MNGID                char(50)             null,
    ADDRESSSTAFF         char(200)            null,
    NAMESTAFF            char(50)             null,
    AGESTAFF             int                  null,
@@ -777,7 +777,7 @@ go
 /* Index: MANAGER_FK                                            */
 /*==============================================================*/
 create index MANAGER_FK on STAFF (
-STA_STAFFID ASC
+MNGID ASC
 )
 go
 
@@ -787,8 +787,9 @@ go
 create table USINGFOOD (
    SERVICEID            char(30)             not null,
    STAFFID              char(50)             not null,
-   BARCODE              char(50)             not null,
-   constraint PK_USINGFOOD primary key nonclustered (SERVICEID, STAFFID, BARCODE)
+   FOODNAME             char(100)            not null,
+   TIME                 datetime             null,
+   constraint PK_USINGFOOD primary key nonclustered (SERVICEID, STAFFID, FOODNAME)
 )
 go
 
@@ -804,7 +805,7 @@ go
 /* Index: CONTAIN_FK                                            */
 /*==============================================================*/
 create index CONTAIN_FK on USINGFOOD (
-BARCODE ASC
+FOODNAME ASC
 )
 go
 
@@ -827,8 +828,8 @@ alter table CLEANER
 go
 
 alter table CLEANER_ROOM
-   add constraint FK_CLEANER__CLEANER_R_ROOM foreign key (ROOMNUMBER)
-      references ROOM (ROOMNUMBER)
+   add constraint FK_CLEANER__CLEANER_R_ROOM foreign key (ROOMDID)
+      references ROOM (ROOMDID)
 go
 
 alter table CLEANER_ROOM
@@ -839,6 +840,11 @@ go
 alter table FOOD
    add constraint FK_FOOD_ORDER_CHE_CHEF foreign key (STAFFID)
       references CHEF (STAFFID)
+go
+
+alter table FOODORDER
+   add constraint FK_FOODORDE_CUSTOMER__CUSTOMER foreign key (IDENTIFICATION)
+      references CUSTOMER (IDENTIFICATION)
 go
 
 alter table INVOICE
@@ -852,23 +858,18 @@ alter table INVOICE
 go
 
 alter table INVOICE
-   add constraint FK_INVOICE_INVOICE_S_ORDER foreign key (SERVICEID)
-      references "ORDER" (SERVICEID)
+   add constraint FK_INVOICE_INVOICE_S_FOODORDE foreign key (SERVICEID)
+      references FOODORDER (SERVICEID)
 go
 
 alter table INVOICE
-   add constraint FK_INVOICE_INVOICE_S_RESERVAI foreign key (SERVICEID)
-      references RESERVAION (SERVICEID)
+   add constraint FK_INVOICE_INVOICE_S_RESERVAT foreign key (SERVICEID)
+      references RESERVATION (SERVICEID)
 go
 
 alter table OPERATINGCOST
    add constraint FK_OPERATIN_BRANCH_OP_BRANCH foreign key (BRANCHID)
       references BRANCH (BRANCHID)
-go
-
-alter table "ORDER"
-   add constraint FK_ORDER_CUSTOMER__CUSTOMER foreign key (IDENTIFICATION)
-      references CUSTOMER (IDENTIFICATION)
 go
 
 alter table RECEPTIONIST
@@ -887,17 +888,17 @@ alter table RENTEDROOM
 go
 
 alter table RENTEDROOM
-   add constraint FK_RENTEDRO_ASSIGNED__ROOM foreign key (ROOMNUMBER)
-      references ROOM (ROOMNUMBER)
+   add constraint FK_RENTEDRO_ASSIGNED__ROOM foreign key (ROOMDID)
+      references ROOM (ROOMDID)
 go
 
 alter table RENTEDROOM
-   add constraint FK_RENTEDRO_CONTAIN2_RESERVAI foreign key (SERVICEID)
-      references RESERVAION (SERVICEID)
+   add constraint FK_RENTEDRO_CONTAIN2_RESERVAT foreign key (SERVICEID)
+      references RESERVATION (SERVICEID)
 go
 
-alter table RESERVAION
-   add constraint FK_RESERVAI_CUSTOMER__CUSTOMER foreign key (IDENTIFICATION)
+alter table RESERVATION
+   add constraint FK_RESERVAT_CUSTOMER__CUSTOMER foreign key (IDENTIFICATION)
       references CUSTOMER (IDENTIFICATION)
 go
 
@@ -912,18 +913,18 @@ alter table STAFF
 go
 
 alter table STAFF
-   add constraint FK_STAFF_MANAGER_STAFF foreign key (STA_STAFFID)
+   add constraint FK_STAFF_MANAGER_STAFF foreign key (MNGID)
       references STAFF (STAFFID)
 go
 
 alter table USINGFOOD
-   add constraint FK_USINGFOO_CONTAIN_FOOD foreign key (BARCODE)
-      references FOOD (BARCODE)
+   add constraint FK_USINGFOO_CONTAIN_FOOD foreign key (FOODNAME)
+      references FOOD (FOODNAME)
 go
 
 alter table USINGFOOD
-   add constraint FK_USINGFOO_CONTAIN3_ORDER foreign key (SERVICEID)
-      references "ORDER" (SERVICEID)
+   add constraint FK_USINGFOO_CONTAIN3_FOODORDE foreign key (SERVICEID)
+      references FOODORDER (SERVICEID)
 go
 
 alter table USINGFOOD
