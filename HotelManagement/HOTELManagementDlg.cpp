@@ -8,7 +8,6 @@
 #include "afxdialogex.h"
 #include "RegisterDlg.h"	
 #include "Util.h"	
-#include "ListRoomsInformationDlg_bkg.h"
 #include "RoomInfo.h"
 #include <vector>
 #include <tuple>
@@ -166,57 +165,29 @@ void HOTELManagementDlg::OnBnClickedBtnLogin()
 {
 	CString us_login;
 	CString pass_login;
+	bool isLoginOk = false;
 
 	edit_username.GetWindowText(us_login);
 	edit_password.GetWindowText(pass_login);
-
-	bool isLoginOk = false;
-	bool isExistedAccount = true;
-
+	
 	// get username and password from register table
-	std::vector<std::vector<CString>> lstData;
-	DatabaseAppication::getInstance()->ExecuteQuerySelect(L"register", lstData);
-
+	std::vector<CString> userInfo;
+	CString condition = L" USERNAME='" + us_login + L"' and PASSWORD='" + pass_login + L"'";
+	DatabaseAppication::getInstance()->ExecuteQuerySelectWithCondition(L"REGISTER", condition, userInfo);
 	// compare with data is input from GUI
-	for (std::vector<std::vector<CString>>::iterator it = lstData.begin(); it != lstData.end(); ++it)
+	if (userInfo.size() > 0)
 	{
-		std::vector<CString> tmp = *it;
-		if (tmp[0].Trim().Compare(us_login) == 0 && tmp[1].Trim().Compare(pass_login) == 0)
-		{
-			isLoginOk = true;
-			break;
-		}
-	}
-	// if yes, go to main monitor
-	if (isLoginOk)
-	{
+			// if yes, go to main monitor
+		isLoginOk = true;
 		RoomsInformationDlg roomInfo_dlg;
 		// find staffid based on us_login
-		std::vector<std::vector<CString>> lstData;
-		DatabaseAppication::getInstance()->ExecuteQuerySelect(L"register", lstData);
-		// compare with data is input from GUI
-		for (int i = 0; i < lstData.size(); i++)
-		{
-			std::vector<CString> tmp = lstData[i];
-			if (tmp[0].Trim().Compare(us_login) == 0 )
-			{
-				roomInfo_dlg.setStaffID(tmp[2].Trim());
-				break;
-			}
-		}
-
-		if (roomInfo_dlg.DoModal() == IDOK)
-		{
-		
-
-		}
+		roomInfo_dlg.setStaffID(userInfo[1].Trim());
+		roomInfo_dlg.DoModal();
 	}
-	else
+
+	if (!isLoginOk)
 	{
-		if (isExistedAccount)
-		{
-			MessageBox(_T("Login failed"), _T("Info"), MB_OK | MB_ICONERROR);
-		}
+		MessageBox(_T("Login failed"), _T("Info"), MB_OK | MB_ICONERROR);
 	}
 }
 
@@ -232,12 +203,11 @@ void HOTELManagementDlg::OnBnClickedBtnRegister()
 		bool isSuccess = register_dlg.get_is_success();
 		if (isSuccess)
 		{
-			std::string strUser = CStringA(str_user);
-			std::string strPass = CStringA(str_pass);
-			CString query = L"insert into register values('";
-			query += str_user + L"','" + str_pass + L"','" + str_staffID + L"')";
-			MessageBox(query);		
-			DatabaseAppication::getInstance()->ExecuteQuery(query);
+			std::vector<std::pair<DataType, CString>> lstField;
+			lstField.push_back(std::make_pair(STRING, str_user));
+			lstField.push_back(std::make_pair(STRING, str_staffID));
+			lstField.push_back(std::make_pair(STRING, str_pass));
+			DatabaseAppication::getInstance()->ExecuteQueryInsert(L"REGISTER", lstField);
 		}
 	}
 }
