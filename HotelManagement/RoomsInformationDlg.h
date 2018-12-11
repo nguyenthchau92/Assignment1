@@ -47,4 +47,5 @@ public:
 	afx_msg void OnBnClickedButtonR404();
 	afx_msg void OnBnClickedButtonR405();
 	afx_msg void OnBnClickedCancel();
+	afx_msg void OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct);
 };

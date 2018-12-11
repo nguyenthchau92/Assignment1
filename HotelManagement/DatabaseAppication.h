@@ -22,6 +22,7 @@ public:
 
 	void ConnectDB();
 	void ExecuteQuery(CString query);
+	void ExecuteQueryDistinctSelect(CString nameTable, CString field, std::vector<CString> &lstData);
 	void ExecuteQuerySelect(CString nameTable, std::vector<std::vector<CString>> &lstData);
 	void ExecuteQuerySelectWithCondition(CString nameTable, CString contition, std::vector<CString> &lstData);
 	void ExecuteQueryInsert(CString nameTable, std::vector<std::pair<DataType, CString>> listData);

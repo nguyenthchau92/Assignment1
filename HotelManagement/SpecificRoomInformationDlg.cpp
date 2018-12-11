@@ -48,12 +48,11 @@ BOOL SpecificRoomInformationDlg::OnInitDialog()
 	combox_sex.SetCurSel(1);
 
 	// create data for combo box food
-	std::vector<std::vector<CString>> lstData;
-	DatabaseAppication::getInstance()->ExecuteQuerySelect(L"FOOD", lstData);
+	std::vector<CString> lstData;
+	DatabaseAppication::getInstance()->ExecuteQueryDistinctSelect(L"FOOD", L"FOODNAME", lstData);
 	for (size_t i = 0; i < lstData.size(); i++)
 	{
-		std::vector<CString> tmp = lstData[i];
-		combo_food.AddString(tmp[0]);
+		combo_food.AddString(lstData[i]);
 	}
 	combo_food.SetCurSel(0);
 
@@ -118,14 +117,21 @@ BOOL SpecificRoomInformationDlg::OnInitDialog()
 					// update age and address to gui
 					edit_age.SetWindowText(age);
 					edit_address.SetWindowText(address);
-					// Insert to table USINGFOOD
-					std::vector<std::vector<CString>> foodData;
-					DatabaseAppication::getInstance()->ExecuteQuerySelect(L"USINGFOOD", foodData);
-					for (size_t i = 0; i < foodData.size(); i++)
+					// Insert food are used to gui
+					std::vector<std::vector<CString>> lstFoodData;
+					DatabaseAppication::getInstance()->ExecuteQuerySelect(L"USINGFOOD", lstFoodData);
+					for (size_t i = 0; i < lstFoodData.size(); i++)
 					{
-						std::vector<CString> tmp = foodData[i];
+						std::vector<CString> tmp = lstFoodData[i];
+						CString foodID = tmp[2].Trim();
 						if (tmp[0].Trim().Compare(serviceID) == 0)
-							listctrl_food.InsertItem(i, tmp[2].Trim());
+						{
+							std::vector<CString> foodData;
+							CString condition = L"FOODID=" + foodID;
+							DatabaseAppication::getInstance()->ExecuteQuerySelectWithCondition(L"FOOD", condition, foodData);
+							CString foodName = foodData[2];
+							listctrl_food.InsertItem(i, foodName);
+						}
 					}
 					break;
 				}
@@ -272,11 +278,27 @@ void SpecificRoomInformationDlg::OnBnClickedOk()
 			std::vector<std::pair<DataType, CString>> lstField;
 			lstField.push_back(std::make_pair(STRING, this->serviceID));
 			lstField.push_back(std::make_pair(STRING, this->staffID));
-			lstField.push_back(std::make_pair(STRING, lstFood[i]));
+			// find foodID to insert into usingfood table
+			std::vector<CString> foodData;
+			CString conditionFood = L"FOODNAME='" + lstFood[i] + L"' AND ISUSED='False'" ;
+			DatabaseAppication::getInstance()->ExecuteQuerySelectWithCondition(L"FOOD", conditionFood, foodData);
+			CString foodID = foodData[0].Trim();
+			lstField.push_back(std::make_pair(INTEGER,foodID));
 			lstField.push_back(std::make_pair(STRING, checkinDate));
 			DatabaseAppication::getInstance()->ExecuteQueryInsert(L"USINGFOOD", lstField);
+			// update status of used food in FOOD talbe is true
+			// Update status Room table is rented
+			std::map<CString, std::pair<DataType, CString>> listData;
+			listData[L"ISUSED"] = std::make_pair(STRING, L"True");
+			std::map<CString, std::pair<DataType, CString>> listCondition;
+			listCondition[L"FOODID"] = std::make_pair(INTEGER, foodID);
+			DatabaseAppication::getInstance()->ExecuteQueryUpdate(L"FOOD", listData, listCondition);
 		}
 		// Get price from room table
+	}
+	else
+	{
+		//MessageBox(L"Room is not available");
 	}
 	CDialogEx::OnOK();
 }

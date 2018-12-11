@@ -31,6 +31,7 @@ DatabaseAppication* DatabaseAppication::getInstance()
 	return instance;
 }
 
+// just return the first row when satisfy the condition
 void DatabaseAppication::ExecuteQuerySelectWithCondition(CString nameTable, CString condition, std::vector<CString> &lstData)
 {
 	CString query = L"select * from " + nameTable + L" where " + condition;
@@ -65,6 +66,21 @@ void DatabaseAppication::ExecuteQuerySelect(CString nameTable, std::vector<std::
 			row.push_back(temp);
 		}
 		lstData.push_back(row);
+		recordset.MoveNext();
+	}
+}
+
+void DatabaseAppication::ExecuteQueryDistinctSelect(CString nameTable, CString field, std::vector<CString> &lstData)
+{
+	CString query = L"Select distinct " + field + L" from " + nameTable;
+	CRecordset recordset(&database);
+	CString temp;
+	recordset.Open(CRecordset::forwardOnly, query, CRecordset::readOnly);
+	while (!recordset.IsEOF())
+	{
+		int idx = 0;
+		recordset.GetFieldValue(idx, temp);
+		lstData.push_back(temp);
 		recordset.MoveNext();
 	}
 }

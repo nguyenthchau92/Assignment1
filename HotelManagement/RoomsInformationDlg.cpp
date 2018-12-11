@@ -208,3 +208,42 @@ void RoomsInformationDlg::OnBnClickedCancel()
 	// TODO: Add your control notification handler code here
 	CDialogEx::OnCancel();
 }
+
+
+void RoomsInformationDlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
+{
+	if (nIDCtl == IDC_BUTTON_R101)
+	{
+		CDC dc;
+
+		dc.Attach(lpDrawItemStruct->hDC);
+		RECT rect;
+		rect = lpDrawItemStruct->rcItem;
+
+		dc.FillSolidRect(&rect, RGB(0, 255, 0));
+		UINT state = lpDrawItemStruct->itemState;
+
+		if ((state & ODS_SELECTED))
+		{
+			dc.DrawEdge(&rect, EDGE_SUNKEN, BF_RECT);
+
+		}
+		else
+		{
+			dc.DrawEdge(&rect, EDGE_RAISED, BF_RECT);
+		}
+
+		dc.SetBkColor(RGB(100, 100, 255));
+		dc.SetTextColor(RGB(255, 0, 0));
+		dc.SetBkMode(TRANSPARENT);
+
+		TCHAR buffer[MAX_PATH];
+		ZeroMemory(buffer, MAX_PATH);
+		::GetWindowText(lpDrawItemStruct->hwndItem, buffer, MAX_PATH);
+		dc.DrawText(buffer, &rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+
+		dc.Detach();
+	}
+
+	CDialog::OnDrawItem(nIDCtl, lpDrawItemStruct);
+}
