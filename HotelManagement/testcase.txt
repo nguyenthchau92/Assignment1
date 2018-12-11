@@ -1,0 +1,56 @@
+// bug
+- Handle date and time for processing bug
+- Food doesn't exist => crashed system
+
+=>
+Manager view bill 
+Code for user can register many rooms at one time
+// thong ke xuat hoa don hang thang
+
+select * from branch
+select * from staff
+select * from chef
+select * from cleaner
+select * from receptionist
+select * from register
+
+select * from customer
+select * from reservation
+select * from foodorder
+
+select * from food
+select distinct FOODNAME from food
+
+
+delete from rentedroom
+delete from usingfood
+delete from invoice
+delete from reservation
+delete from foodorder
+delete from customer
+
+
+1. Login -> go to screen management room -> Click button to select room (ex: room 101) 
+   1.1 For renting room
+		- Get data from GUI ( userID, date,...) 
+		- Create a serverID
+		- Update table 
+			+ Customer
+			+ Update reservation table
+			+ RentedRoom
+			+ Update status Room table is rented
+			+ Order
+			+ RentedFood
+		- Get price from room table
+	1.2 For view information room
+		- If status room is not empty, I will get data from database ( RentedRoom, Room) based on roomID
+2.  For produce bill
+	2.1 Go to screen checkout
+	2.2 Update data in table Bill ( RentedRoom and Order)
+	2.3 Get data from table Bill to GUI
+	2.4 Updat status room to empty
+3. 
+
+
+
+n, use _CRT_SECURE_NO_WARNINGS. See online help for details.	C:\Users\overflow\Documents\Visual Studio 2013\Projects\StudyC++\Assignment1\HotelManagement\SpecificRoomInformationDlg.cpp	99	1	HOTEManagement
