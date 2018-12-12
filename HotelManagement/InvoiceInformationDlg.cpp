@@ -67,36 +67,32 @@ BOOL InvoiceInformationDlg::OnInitDialog()
 		{
 			// Get price from FOOD table based on FOODNAME
 			std::vector<CString> lstFoodData;
-			CString condition = L"FOODNAME='" + temp[2].Trim() + "'";
+			CString condition = L"FOODID=" + temp[2].Trim();
 			DatabaseAppication::getInstance()->ExecuteQuerySelectWithCondition(L"FOOD", condition, lstFoodData);
 			if (lstFoodData.size() > 0)
 			{
-				CString foodCost = lstFoodData[4].Trim();
+				CString foodCost = lstFoodData[5].Trim();
 				std::map<CString, CString> tmp;
-				tmp[temp[2].Trim()] = foodCost;
+				tmp[lstFoodData[2].Trim()] = foodCost;
 				lstFoodCost.push_back(tmp);
 			}
 		}
 	}
 
 	float fCostInvoice = 0;
-
 	for (int i = 0; i < lstRoomCost.size(); i++)
 	{
 		std::map<CString, CString> tmp = lstRoomCost[i];
 		fCostInvoice += _tstof(tmp.begin()->second);
-	}
-	
+	}	
 	if (numDay == 0)
-		numDay = 1;
+		numDay++;
 	fCostInvoice *= numDay;	
-
 	for (int i = 0; i < lstFoodCost.size(); i++)
 	{
 		std::map<CString, CString> tmp = lstFoodCost[i];
 		fCostInvoice += _tstof(tmp.begin()->second);
 	}
-
 	costInvoice.Format(L"%f", fCostInvoice);
 
 	std::vector<std::pair<DataType, CString>> lstField;
@@ -118,7 +114,7 @@ BOOL InvoiceInformationDlg::OnInitDialog()
 	edit_name_user.SetWindowText(username);
 
 	// update time
-	SYSTEMTIME billTime;
+	/*SYSTEMTIME billTime;
 	int ci_year = 0, ci_day = 0, ci_month = 0;
 	memset(&billTime, 0x00, sizeof(SYSTEMTIME));
 	std::string stimeInvoice = CStringA(timeInvoice);
@@ -126,8 +122,10 @@ BOOL InvoiceInformationDlg::OnInitDialog()
 	sscanf((char*)stimeInvoice.c_str(), "%d-%d-%d", &ci_year, &ci_month, &ci_day);
 	billTime.wYear = ci_year;
 	billTime.wDay = ci_day;
-	billTime.wMonth = ci_month;
-	datetime_picker_invoice.SetTime(billTime);
+	billTime.wMonth = ci_month;*/
+	COleDateTime tm1;
+	tm1.ParseDateTime(timeInvoice);
+	datetime_picker_invoice.SetTime(tm1);
 
 	// find name staff in table staff based on staffid
 	std::vector<CString> staffData;

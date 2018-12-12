@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      Microsoft SQL Server 2008                    */
-/* Created on:     12/8/2018 9:40:44 AM                         */
+/* Created on:     12/10/2018 8:36:09 PM                        */
 /*==============================================================*/
 
 
@@ -466,7 +466,7 @@ go
 create table CHEF (
    STAFFID              char(50)             not null,
    BRANCHID             char(50)             not null,
-   MNGID                char(50)             not null,
+   STA_STAFFID          char(50)             not null,
    ADDRESSSTAFF         char(200)            null,
    NAMESTAFF            char(50)             null,
    AGESTAFF             int                  null,
@@ -484,7 +484,7 @@ go
 create table CLEANER (
    STAFFID              char(50)             not null,
    BRANCHID             char(50)             not null,
-   MNGID                char(50)             not null,
+   STA_STAFFID          char(50)             not null,
    ADDRESSSTAFF         char(200)            null,
    NAMESTAFF            char(50)             null,
    AGESTAFF             int                  null,
@@ -501,8 +501,8 @@ go
 /*==============================================================*/
 create table CLEANER_ROOM (
    STAFFID              char(50)             not null,
-   ROOMDID              int                  not null,
-   constraint PK_CLEANER_ROOM primary key nonclustered (STAFFID, ROOMDID)
+   ROOMID               int                  not null,
+   constraint PK_CLEANER_ROOM primary key nonclustered (STAFFID, ROOMID)
 )
 go
 
@@ -518,7 +518,7 @@ go
 /* Index: CLEANER_ROOM_FK                                       */
 /*==============================================================*/
 create index CLEANER_ROOM_FK on CLEANER_ROOM (
-ROOMDID ASC
+ROOMID ASC
 )
 go
 
@@ -539,12 +539,14 @@ go
 /* Table: FOOD                                                  */
 /*==============================================================*/
 create table FOOD (
-   FOODNAME             char(100)            not null,
+   FOODID               int                  not null,
    STAFFID              char(50)             not null,
+   FOODNAME             char(100)            null,
    FOODEXPIREDDATE      datetime             null,
    MANUFACTUREDATE      datetime             null,
    FOODCOST             int                  null,
-   constraint PK_FOOD primary key nonclustered (FOODNAME)
+   ISUSED               bit                  null,
+   constraint PK_FOOD primary key nonclustered (FOODID)
 )
 go
 
@@ -637,7 +639,7 @@ go
 create table RECEPTIONIST (
    STAFFID              char(50)             not null,
    BRANCHID             char(50)             not null,
-   MNGID                char(50)             not null,
+   STA_STAFFID          char(50)             not null,
    ADDRESSSTAFF         char(200)            null,
    NAMESTAFF            char(50)             null,
    AGESTAFF             int                  null,
@@ -674,10 +676,10 @@ go
 create table RENTEDROOM (
    SERVICEID            char(30)             not null,
    STAFFID              char(50)             not null,
-   ROOMDID              int                  not null,
+   ROOMID               int                  not null,
    CHECKINDATE          datetime             null,
    CHECKOUTDATE         datetime             null,
-   constraint PK_RENTEDROOM primary key nonclustered (SERVICEID, STAFFID, ROOMDID)
+   constraint PK_RENTEDROOM primary key nonclustered (SERVICEID, STAFFID, ROOMID)
 )
 go
 
@@ -701,7 +703,7 @@ go
 /* Index: ASSIGNED_TO_FK                                        */
 /*==============================================================*/
 create index ASSIGNED_TO_FK on RENTEDROOM (
-ROOMDID ASC
+ROOMID ASC
 )
 go
 
@@ -728,14 +730,14 @@ go
 /* Table: ROOM                                                  */
 /*==============================================================*/
 create table ROOM (
-   ROOMDID              int                  not null,
+   ROOMID               int                  not null,
    BRANCHID             char(50)             not null,
    STATUS               bit                  null,
    ROOMTYPE             char(50)             null,
    MAINTAIN             bit                  null,
    ROOMCOST             int                  null,
    ROOMNUMBER           int                  null,
-   constraint PK_ROOM primary key nonclustered (ROOMDID)
+   constraint PK_ROOM primary key nonclustered (ROOMID)
 )
 go
 
@@ -753,7 +755,7 @@ go
 create table STAFF (
    STAFFID              char(50)             not null,
    BRANCHID             char(50)             not null,
-   MNGID                char(50)             null,
+   STA_STAFFID          char(50)             null,
    ADDRESSSTAFF         char(200)            null,
    NAMESTAFF            char(50)             null,
    AGESTAFF             int                  null,
@@ -777,7 +779,7 @@ go
 /* Index: MANAGER_FK                                            */
 /*==============================================================*/
 create index MANAGER_FK on STAFF (
-MNGID ASC
+STA_STAFFID ASC
 )
 go
 
@@ -787,9 +789,9 @@ go
 create table USINGFOOD (
    SERVICEID            char(30)             not null,
    STAFFID              char(50)             not null,
-   FOODNAME             char(100)            not null,
+   FOODID               int                  not null,
    TIME                 datetime             null,
-   constraint PK_USINGFOOD primary key nonclustered (SERVICEID, STAFFID, FOODNAME)
+   constraint PK_USINGFOOD primary key nonclustered (SERVICEID, STAFFID, FOODID)
 )
 go
 
@@ -805,7 +807,7 @@ go
 /* Index: CONTAIN_FK                                            */
 /*==============================================================*/
 create index CONTAIN_FK on USINGFOOD (
-FOODNAME ASC
+FOODID ASC
 )
 go
 
@@ -828,8 +830,8 @@ alter table CLEANER
 go
 
 alter table CLEANER_ROOM
-   add constraint FK_CLEANER__CLEANER_R_ROOM foreign key (ROOMDID)
-      references ROOM (ROOMDID)
+   add constraint FK_CLEANER__CLEANER_R_ROOM foreign key (ROOMID)
+      references ROOM (ROOMID)
 go
 
 alter table CLEANER_ROOM
@@ -888,8 +890,8 @@ alter table RENTEDROOM
 go
 
 alter table RENTEDROOM
-   add constraint FK_RENTEDRO_ASSIGNED__ROOM foreign key (ROOMDID)
-      references ROOM (ROOMDID)
+   add constraint FK_RENTEDRO_ASSIGNED__ROOM foreign key (ROOMID)
+      references ROOM (ROOMID)
 go
 
 alter table RENTEDROOM
@@ -913,13 +915,13 @@ alter table STAFF
 go
 
 alter table STAFF
-   add constraint FK_STAFF_MANAGER_STAFF foreign key (MNGID)
+   add constraint FK_STAFF_MANAGER_STAFF foreign key (STA_STAFFID)
       references STAFF (STAFFID)
 go
 
 alter table USINGFOOD
-   add constraint FK_USINGFOO_CONTAIN_FOOD foreign key (FOODNAME)
-      references FOOD (FOODNAME)
+   add constraint FK_USINGFOO_CONTAIN_FOOD foreign key (FOODID)
+      references FOOD (FOODID)
 go
 
 alter table USINGFOOD

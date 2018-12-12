@@ -1,7 +1,11 @@
 // bug
-- Handle date and time for processing bug
+
 - Food doesn't exist => crashed system
 
+
+	//CTime t = CTime::GetCurrentTime();
+	//CString s = t.Format("%m%d%Y");
+	
 =>
 Manager view bill 
 Code for user can register many rooms at one time
@@ -30,17 +34,18 @@ delete from foodorder
 delete from customer
 
 
+///
 1. Login -> go to screen management room -> Click button to select room (ex: room 101) 
    1.1 For renting room
 		- Get data from GUI ( userID, date,...) 
 		- Create a serverID
-		- Update table 
-			+ Customer
-			+ Update reservation table
+		- Update table
+			+ Customer table
+            + Reservation table
 			+ RentedRoom
 			+ Update status Room table is rented
-			+ Order
-			+ RentedFood
+            + add Food on GUI
+			+ USINGFOOD
 		- Get price from room table
 	1.2 For view information room
 		- If status room is not empty, I will get data from database ( RentedRoom, Room) based on roomID
@@ -49,8 +54,16 @@ delete from customer
 	2.2 Update data in table Bill ( RentedRoom and Order)
 	2.3 Get data from table Bill to GUI
 	2.4 Updat status room to empty
-3. 
+3. // for renting by checking date and time
+    3.1 Utility for support time management, If another reservation for future (Bug)
+	
+    3.2 Green button
+	
+4. For rented many room
+    3.1 GUI for renting many room
+    3.2 Payment: Choosing latest room based on smallest day in the order of renting room in RENTEDROOM
+    3.3 
 
+5. For statistics of monthly income ( based on Bill)
 
-
-n, use _CRT_SECURE_NO_WARNINGS. See online help for details.	C:\Users\overflow\Documents\Visual Studio 2013\Projects\StudyC++\Assignment1\HotelManagement\SpecificRoomInformationDlg.cpp	99	1	HOTEManagement
+// Key-Value store in chaper 24 Database

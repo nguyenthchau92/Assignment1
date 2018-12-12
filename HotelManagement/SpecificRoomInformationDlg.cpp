@@ -314,31 +314,8 @@ void SpecificRoomInformationDlg::OnBnClickedButtonPayment()
 	invoice.setTimeInvoice(g_checkoutdate);
 	//g_checkinDate
 
-	// calculator num of rented day
-	// update time
-	SYSTEMTIME checkinTime;
-	int ci_year = 0, ci_day = 0, ci_month = 0;
-	memset(&checkinTime, 0x00, sizeof(SYSTEMTIME));
-	std::string sCheckinTime = CStringA(g_checkinDate);
-	sCheckinTime = sCheckinTime.substr(0, sCheckinTime.find_first_of(" "));
-	sscanf((char*)sCheckinTime.c_str(), "%d-%d-%d", &ci_year, &ci_month, &ci_day);
-	checkinTime.wYear = ci_year;
-	checkinTime.wDay = ci_day;
-	checkinTime.wMonth = ci_month;
-
-	SYSTEMTIME checkoutTime;
-	int co_year = 0, co_day = 0, co_month = 0;
-	memset(&checkoutTime, 0x00, sizeof(SYSTEMTIME));
-	std::string sCheckoutTime = CStringA(g_checkoutdate);
-	sCheckoutTime = sCheckoutTime.substr(0, sCheckoutTime.find_first_of(" "));
-	sscanf((char*)sCheckoutTime.c_str(), "%d-%d-%d", &co_year, &co_month, &co_day);
-	checkoutTime.wYear = co_year;
-	checkoutTime.wDay = co_day;
-	checkoutTime.wMonth = co_month;
-
-	int numOfDay = co_day - ci_day;
+	int numOfDay = GetNumDateBetweenTwoTime(g_checkinDate, g_checkoutdate);
 	invoice.setNumDay(numOfDay);
-
 	if (invoice.DoModal() == IDOK)
 	{
 		// go to invoice monitor
