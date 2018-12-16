@@ -5,11 +5,36 @@
 #include "RoomsInformationDlg.h"
 #include "afxdialogex.h"
 #include "SpecificRoomInformationDlg.h"
+#include <map>
 
 
 // RoomsInformationDlg dialog
 
 IMPLEMENT_DYNAMIC(RoomsInformationDlg, CDialogEx)
+
+std::map<int,CString> roomID2Name =
+{
+	{ IDC_BUTTON_R101, L"101" },
+	{ IDC_BUTTON_R102, L"102" },
+	{ IDC_BUTTON_R103, L"103" },
+	{ IDC_BUTTON_R104, L"104" },
+	{ IDC_BUTTON_R105, L"105" },
+	{ IDC_BUTTON_R201, L"201" },
+	{ IDC_BUTTON_R202, L"202" },
+	{ IDC_BUTTON_R203, L"203" },
+	{ IDC_BUTTON_R204, L"204" },
+	{ IDC_BUTTON_R205, L"205" },
+	{ IDC_BUTTON_R301, L"301" },
+	{ IDC_BUTTON_R302, L"302" },
+	{ IDC_BUTTON_R303, L"303" },
+	{ IDC_BUTTON_R304, L"304" },
+	{ IDC_BUTTON_R305, L"305" },
+	{ IDC_BUTTON_R401, L"401" },
+	{ IDC_BUTTON_R402, L"402" },
+	{ IDC_BUTTON_R403, L"403" },
+	{ IDC_BUTTON_R404, L"404" },
+	{ IDC_BUTTON_R405, L"405" },
+};
 
 RoomsInformationDlg::RoomsInformationDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(RoomsInformationDlg::IDD, pParent)
@@ -233,73 +258,7 @@ void RoomsInformationDlg::OnBnClickedCancel()
 
 void RoomsInformationDlg::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
 {
-	CString roomnumber;
-	switch (nIDCtl)
-	{
-		case IDC_BUTTON_R101:
-			roomnumber = L"101";
-			break;
-		case IDC_BUTTON_R102:
-			roomnumber = L"102";
-			break;
-		case IDC_BUTTON_R103:
-			roomnumber = L"103";
-			break;
-		case IDC_BUTTON_R104:
-			roomnumber = L"104";
-			break;
-		case IDC_BUTTON_R105:
-			roomnumber = L"105";
-			break;
-		case IDC_BUTTON_R201:
-			roomnumber = L"201";
-			break;
-		case IDC_BUTTON_R202:
-			roomnumber = L"202";
-			break;
-		case IDC_BUTTON_R203:
-			roomnumber = L"203";
-			break;
-		case IDC_BUTTON_R204:
-			roomnumber = L"204";
-			break;
-		case IDC_BUTTON_R205:
-			roomnumber = L"205";
-			break;
-		case IDC_BUTTON_R301:
-			roomnumber = L"301";
-			break;
-		case IDC_BUTTON_R302:
-			roomnumber = L"302";
-			break;
-		case IDC_BUTTON_R303:
-			roomnumber = L"303";
-			break;
-		case IDC_BUTTON_R304:
-			roomnumber = L"304";
-			break;
-		case IDC_BUTTON_R305:
-			roomnumber = L"305";
-			break;
-		case IDC_BUTTON_R401:
-			roomnumber = L"401";
-			break;
-		case IDC_BUTTON_R402:
-			roomnumber = L"402";
-			break;
-		case IDC_BUTTON_R403:
-			roomnumber = L"403";
-			break;
-		case IDC_BUTTON_R404:
-			roomnumber = L"404";
-			break;
-		case IDC_BUTTON_R405:
-			roomnumber = L"405";
-			break;
-		default:
-			break;
-	}
-
+	CString roomnumber = roomID2Name[nIDCtl];
 	SpecificRoomInformationDlg roomDlg;
 	std::vector<CString> lstData;
 	CString branchID, roomStatus = L"0";

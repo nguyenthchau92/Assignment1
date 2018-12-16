@@ -94,17 +94,7 @@ BOOL InvoiceInformationDlg::OnInitDialog()
 		fCostInvoice += _tstof(tmp.begin()->second);
 	}
 	costInvoice.Format(L"%f", fCostInvoice);
-
-	std::vector<std::pair<DataType, CString>> lstField;
-	lstField.push_back(std::make_pair(STRING, identification));
-	lstField.push_back(std::make_pair(STRING, serviceID));
-	lstField.push_back(std::make_pair(STRING, staffID));
-	lstField.push_back(std::make_pair(STRING, timeInvoice));
-	lstField.push_back(std::make_pair(INTEGER, costInvoice));
-	DatabaseAppication::getInstance()->ExecuteQueryInsert(L"INVOICE", lstField);
-
-	//	2.3 Upload data from table Bill to GUI
-
+	//	2.3 Upload data from table Invoice to GUI
 	// update customer name from userID
 	std::vector<CString> lstUsername;
 	CString condition = L"IDENTIFICATION='" + identification + "'";
@@ -112,19 +102,16 @@ BOOL InvoiceInformationDlg::OnInitDialog()
 	if (lstUsername.size() > 0)
 		username = lstUsername[4].Trim();
 	edit_name_user.SetWindowText(username);
-
-	COleDateTime tm1;
-	tm1.ParseDateTime(timeInvoice);
-	datetime_picker_invoice.SetTime(tm1);
-
-	// find name staff in table staff based on staffid
+	// update time invoice to gui
+	COleDateTime tmp;
+	tmp.ParseDateTime(timeInvoice);
+	datetime_picker_invoice.SetTime(tmp);
+	// find name staff in table staff based on staffid, then update staffName to GUI
 	std::vector<CString> staffData;
 	CString conditionStaff = L"STAFFID='" + staffID + L"'";
 	DatabaseAppication::getInstance()->ExeQuerySelectOneRowWithCond(L"STAFF", conditionStaff, staffData);
 	if (staffData.size() > 0)
-	{
 		edit_staff_name.SetWindowText(staffData[4]);
-	}
 	// Add foodName, foodCost
 	for (size_t i = 0; i < lstFoodCost.size(); i++)
 	{
@@ -139,23 +126,9 @@ BOOL InvoiceInformationDlg::OnInitDialog()
 		list_ctrl_item.InsertItem(i + lstFoodCost.size(), L"Room " + tmp.begin()->first);
 		list_ctrl_item.SetItemText(i + lstFoodCost.size(), 1, tmp.begin()->second);
 	}
-	// add cost invoice to gui
+	// Add cost invoice to gui
 	edit_total_price.SetWindowText(costInvoice);
-	//	2.4 Update status room is empty, reservation is empty
-	// Update status Room table is rented
-	std::map<CString, std::pair<DataType, CString>> listRoomData;
-	listRoomData[L"STATUS"] = std::make_pair(STRING, L"False");
-	std::map<CString, std::pair<DataType, CString>> listRoomCondition;
-	listRoomCondition[L"ROOMID"] = std::make_pair(INTEGER, roomID);
-	DatabaseAppication::getInstance()->ExecuteQueryUpdate(L"ROOM", listRoomData, listRoomCondition);
 
-	std::map<CString, std::pair<DataType, CString>> listReservationData;
-	listReservationData[L"PAID"] = std::make_pair(STRING, L"True");
-	std::map<CString, std::pair<DataType, CString>> listReserCondition;
-	listReserCondition[L"SERVICEID"] = std::make_pair(STRING, serviceID);
-	DatabaseAppication::getInstance()->ExecuteQueryUpdate(L"RESERVATION", listReservationData, listReserCondition);
-	UpdateData(false);
-	
 	return true;
 }
 
@@ -180,8 +153,28 @@ END_MESSAGE_MAP()
 
 void InvoiceInformationDlg::OnBnClickedOk()
 {
+	std::vector<std::pair<DataType, CString>> lstField;
+	lstField.push_back(std::make_pair(STRING, identification));
+	lstField.push_back(std::make_pair(STRING, serviceID));
+	lstField.push_back(std::make_pair(STRING, staffID));
+	lstField.push_back(std::make_pair(STRING, timeInvoice));
+	lstField.push_back(std::make_pair(INTEGER, costInvoice));
+	DatabaseAppication::getInstance()->ExecuteQueryInsert(L"INVOICE", lstField);
 
+	//	2.4 Update status room is empty, reservation is empty
+	// Update status Room table is rented
+	std::map<CString, std::pair<DataType, CString>> listRoomData;
+	listRoomData[L"STATUS"] = std::make_pair(STRING, L"False");
+	std::map<CString, std::pair<DataType, CString>> listRoomCondition;
+	listRoomCondition[L"ROOMID"] = std::make_pair(INTEGER, roomID);
+	DatabaseAppication::getInstance()->ExecuteQueryUpdate(L"ROOM", listRoomData, listRoomCondition);
 
-	// TODO: Add your control notification handler code here
+	std::map<CString, std::pair<DataType, CString>> listReservationData;
+	listReservationData[L"PAID"] = std::make_pair(STRING, L"True");
+	std::map<CString, std::pair<DataType, CString>> listReserCondition;
+	listReserCondition[L"SERVICEID"] = std::make_pair(STRING, serviceID);
+	DatabaseAppication::getInstance()->ExecuteQueryUpdate(L"RESERVATION", listReservationData, listReserCondition);
+	UpdateData(false);
+
 	CDialogEx::OnOK();
 }

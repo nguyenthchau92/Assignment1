@@ -135,6 +135,14 @@ BOOL SpecificRoomInformationDlg::OnInitDialog()
 			}
 		}
 	}
+	else
+	{
+		// disable button payment when customer does not rent any room
+		CWnd *okbtn = GetDlgItem(IDC_BUTTON_PAYMENT);
+		if (okbtn) {
+			okbtn->EnableWindow(FALSE);
+		}
+	}
 	
 	// update data to gui
 	UpdateData(false);
@@ -330,21 +338,26 @@ void SpecificRoomInformationDlg::AddFood(bool isAdditionalFood)
 		lstField.push_back(std::make_pair(STRING, this->staffID));
 		// find foodID to insert into usingfood table
 		std::vector<CString> foodData;
-		CString conditionFood = L"FOODNAME='" + lstFood[i] + L"' AND ISUSED='False'";
+		CString conditionFood = L"FOODNAME='" + lstFood[i].Trim() + L"' AND ISUSED='False'";
 		DatabaseAppication::getInstance()->ExeQuerySelectOneRowWithCond(L"FOOD", conditionFood, foodData);
-		CString foodID = foodData[0].Trim();
-		lstField.push_back(std::make_pair(INTEGER, foodID));
-		CTime t = CTime::GetCurrentTime();
-		CString currentTime = t.Format("%Y%m%d");
-		lstField.push_back(std::make_pair(STRING, currentTime));
-		DatabaseAppication::getInstance()->ExecuteQueryInsert(L"USINGFOOD", lstField);
-		// update status of used food in FOOD talbe is true
-		// Update status Room table is rented
-		std::map<CString, std::pair<DataType, CString>> listData;
-		listData[L"ISUSED"] = std::make_pair(STRING, L"True");
-		std::map<CString, std::pair<DataType, CString>> listCondition;
-		listCondition[L"FOODID"] = std::make_pair(INTEGER, foodID);
-		DatabaseAppication::getInstance()->ExecuteQueryUpdate(L"FOOD", listData, listCondition);
+		if (foodData.size() > 0)
+		{
+			CString foodID = foodData[0].Trim();
+			lstField.push_back(std::make_pair(INTEGER, foodID));
+			CTime t = CTime::GetCurrentTime();
+			CString currentTime = t.Format("%Y%m%d");
+			lstField.push_back(std::make_pair(STRING, currentTime));
+			DatabaseAppication::getInstance()->ExecuteQueryInsert(L"USINGFOOD", lstField);
+			// update status of used food in FOOD talbe is true
+			// Update status Room table is rented
+			std::map<CString, std::pair<DataType, CString>> listData;
+			listData[L"ISUSED"] = std::make_pair(STRING, L"True");
+			std::map<CString, std::pair<DataType, CString>> listCondition;
+			listCondition[L"FOODID"] = std::make_pair(INTEGER, foodID);
+			DatabaseAppication::getInstance()->ExecuteQueryUpdate(L"FOOD", listData, listCondition);
+		}
+		else
+			MessageBox(L"The " + lstFood[i].Trim() + L" is not available");
 	}
 
 
@@ -359,16 +372,18 @@ void SpecificRoomInformationDlg::OnBnClickedButtonPayment()
 	invoice.setRoomID(roomID);
 	invoice.setTimeInvoice(g_checkoutdate);
 	//g_checkinDate
-
 	int numOfDay = GetNumDateBetweenTwoTime(g_checkinDate, g_checkoutdate);
 	invoice.setNumDay(numOfDay);
-	if (invoice.DoModal() == IDOK)
+	int errorCode = invoice.DoModal();
+	switch (errorCode)
 	{
-		// go to invoice monitor
+	case IDOK:
 		CDialogEx::OnOK();
-
+		break;
+	case IDCANCEL:
+	case IDCLOSE:
+		break;
+	default:
+		break;
 	}
-
-	
-
 }

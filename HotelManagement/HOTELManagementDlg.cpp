@@ -8,7 +8,6 @@
 #include "afxdialogex.h"
 #include "RegisterDlg.h"	
 #include "Util.h"	
-#include "RoomInfo.h"
 #include <vector>
 #include <tuple>
 #include "DatabaseAppication.h"

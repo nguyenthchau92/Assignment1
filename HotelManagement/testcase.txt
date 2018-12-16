@@ -58,8 +58,28 @@ delete from customer
 	3.3 Adding food   
 
 4. For statistics of monthly income ( based on Bill)	
+
+// test for my application and fix bug
+1. Login feature
+2. Manager feature
+3. Receptionist feature
+4. Add more food
+
+5. Renting room
+	4.1 Does not rent food
+	4.2 Rent food
 	
-5. For rented many room
+	4.3 Rent food and food is empty
+	
+	
+	
+
+6. Payment (cancel)
+	
+	
+Enhance1 // for renting by checking date and time	
+
+Enhance2 For rented many room
     3.1 GUI for renting many room
     3.2 Payment: Choosing latest room based on smallest day in the order of renting room in RENTEDROOM
     3.3 

@@ -4,7 +4,6 @@
 
 #pragma once
 #include "afxwin.h"
-#include "AcInfo.h"
 #include <vector>
 
 
@@ -37,8 +36,6 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
-protected:
-	AcInfomation* p_ac_info;
 protected:
 	CEdit edit_username;
 	CEdit edit_password;
