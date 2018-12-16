@@ -121,6 +121,8 @@ END_MESSAGE_MAP()
 
 void ManagerManagement::OnBnClickedBtnCalculate()
 {
+	// clear old screen
+	lst_ctrl_invoice.DeleteAllItems();
 	// show bill to gui
 	// find all bill which belong to one month
 	CString year, month;
@@ -135,18 +137,26 @@ void ManagerManagement::OnBnClickedBtnCalculate()
 	for (size_t i = 0; i < lstBill.size(); i++)
 	{
 		std::vector<CString> eachInvoice = lstBill[i];
-		CString identification = eachInvoice[0];
-		CString service = eachInvoice[1];
 		CString staffID = eachInvoice[2];
-		CString timeInvoice = eachInvoice[3];
-		CString costInvoice = eachInvoice[4];
-		lst_ctrl_invoice.InsertItem(rowInvoice, identification);
-		lst_ctrl_invoice.SetItemText(rowInvoice, 1, service);
-		lst_ctrl_invoice.SetItemText(rowInvoice, 2, staffID);
-		lst_ctrl_invoice.SetItemText(rowInvoice, 3, timeInvoice);
-		lst_ctrl_invoice.SetItemText(rowInvoice, 4, costInvoice);
-		fTotalSalary += _tstof(costInvoice);
-		rowInvoice++;
+		// find branch of staffID
+		std::vector<CString> lstData;
+		CString condition = L"STAFFID='" + staffID + L"'";
+		DatabaseAppication::getInstance()->ExeQuerySelectOneRowWithCond(L"STAFF", condition, lstData);
+		if (lstData[1].Trim().Compare(branchID) == 0)
+		{
+			CString identification = eachInvoice[0];
+			CString service = eachInvoice[1];
+
+			CString timeInvoice = eachInvoice[3];
+			CString costInvoice = eachInvoice[4];
+			lst_ctrl_invoice.InsertItem(rowInvoice, identification);
+			lst_ctrl_invoice.SetItemText(rowInvoice, 1, service);
+			lst_ctrl_invoice.SetItemText(rowInvoice, 2, staffID);
+			lst_ctrl_invoice.SetItemText(rowInvoice, 3, timeInvoice);
+			lst_ctrl_invoice.SetItemText(rowInvoice, 4, costInvoice);
+			fTotalSalary += _tstof(costInvoice);
+			rowInvoice++;
+		}
 	}
 
 	CString result;
