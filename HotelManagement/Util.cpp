@@ -20,8 +20,17 @@ int GetNumDateBetweenTwoTime(CString g_BeginDate, CString  g_EndDate)
 {
 	COleDateTime tm1;
 	COleDateTime tm2;
-	tm1.ParseDateTime(g_BeginDate);
-	tm2.ParseDateTime(g_EndDate);
+	// format time to yyyy-mm-dd
+	std::string sBeginDate = CStringA(g_BeginDate);
+	sBeginDate = sBeginDate.substr(0, sBeginDate.find_first_of(" "));
+	CString cs_sCheckInDate(sBeginDate.c_str());
+	// format time to yyy-mm-dd
+	std::string sEndDate = CStringA(g_EndDate);
+	sEndDate = sEndDate.substr(0, sEndDate.find_first_of(" "));
+	CString cs_sCheckOutDate(sEndDate.c_str());
+	// diff timestamp
+	tm1.ParseDateTime(cs_sCheckInDate);
+	tm2.ParseDateTime(cs_sCheckOutDate);
 	COleDateTimeSpan ts = tm2 - tm1;
 	int numOfDays = ts.GetDays();
 	return numOfDays;
@@ -31,12 +40,19 @@ bool CompareTwoTime(CString g_BeginDate, CString  g_EndDate)
 {
 	COleDateTime tm1;
 	COleDateTime tm2;
-	tm1.ParseDateTime(g_BeginDate);
-	tm2.ParseDateTime(g_EndDate);
+	// format time to yyyy-mm-dd
+	std::string sBeginDate = CStringA(g_BeginDate);
+	sBeginDate = sBeginDate.substr(0, sBeginDate.find_first_of(" "));
+	CString cs_sCheckInDate(sBeginDate.c_str());
+	// format time to yyy-mm-dd
+	std::string sEndDate = CStringA(g_EndDate);
+	sEndDate = sEndDate.substr(0, sEndDate.find_first_of(" "));
+	CString cs_sCheckOutDate(sEndDate.c_str());
+	// diff timestamp
+	tm1.ParseDateTime(cs_sCheckInDate);
+	tm2.ParseDateTime(cs_sCheckOutDate);
 	COleDateTimeSpan ts = tm2 - tm1;
 	int numOfDays = ts.GetDays();
-	if (numOfDays >= 0)
-		return true;
-	return false;
+	return (numOfDays > 0) ? true : false;
 }
 

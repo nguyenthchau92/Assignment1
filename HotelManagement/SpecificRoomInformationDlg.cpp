@@ -72,7 +72,7 @@ BOOL SpecificRoomInformationDlg::OnInitDialog()
 				serviceID = temp[0].Trim();
 				std::vector<CString> reservationData;
 				CString condition = L"SERVICEID='" + serviceID + L"'";
-				DatabaseAppication::getInstance()->ExecuteQuerySelectWithCondition(L"RESERVATION", condition, reservationData);
+				DatabaseAppication::getInstance()->ExeQuerySelectOneRowWithCond(L"RESERVATION", condition, reservationData);
 				if (reservationData.size() > 0 && reservationData[2].Trim() == L"0")
 				{
 					g_customerID = reservationData[1].Trim();
@@ -81,7 +81,7 @@ BOOL SpecificRoomInformationDlg::OnInitDialog()
 					// find user's information in customer table
 					std::vector<CString> customerData;
 					CString conditionCus = L"IDENTIFICATION='" + g_customerID + L"'";
-					DatabaseAppication::getInstance()->ExecuteQuerySelectWithCondition(L"CUSTOMER", conditionCus, customerData);
+					DatabaseAppication::getInstance()->ExeQuerySelectOneRowWithCond(L"CUSTOMER", conditionCus, customerData);
 					CString gender = customerData[1].Trim();
 					CString address = customerData[2].Trim();
 					CString age = customerData[3].Trim();
@@ -94,26 +94,23 @@ BOOL SpecificRoomInformationDlg::OnInitDialog()
 					else
 						combox_sex.SetCurSel(0);
 					// update checkin to gui
-					SYSTEMTIME checkintime;
-					int ci_year = 0, ci_day = 0, ci_month = 0;
-					memset(&checkintime, 0x00, sizeof(SYSTEMTIME));
-					std::string sCheckinDate = CStringA(g_checkinDate);
+					COleDateTime inTime;
+					std::string sCheckinDate = CStringA(g_checkinDate.Trim());
+					// yyy-mm-dd
 					sCheckinDate = sCheckinDate.substr(0, sCheckinDate.find_first_of(" "));
-					sscanf((char*)sCheckinDate.c_str(), "%d-%d-%d", &ci_year, &ci_month, &ci_day);
-					checkintime.wYear = ci_year;
-					checkintime.wDay = ci_day;
-					checkintime.wMonth = ci_month;
-					datetime_checkin_room.SetTime(checkintime);
+					CString cs_sCheckinDate(sCheckinDate.c_str());
+					inTime.ParseDateTime(cs_sCheckinDate);
+					datetime_checkin_room.SetTime(inTime);
+					
 					// update checkout day to gui
-					SYSTEMTIME checkouttime;
-					int co_year = 0, co_day = 0, co_month = 0;
-					memset(&checkouttime, 0x00, sizeof(SYSTEMTIME));
-					std::string sco_Date = CStringA(g_checkoutdate.Trim());
-					sscanf((char*)sco_Date.c_str(), "%d-%d-%d", &co_year, &co_month, &co_day);
-					checkouttime.wYear = co_year;
-					checkouttime.wDay = co_day;
-					checkouttime.wMonth = co_month;
-					datetime_checkout_room.SetTime(checkouttime);
+					COleDateTime outTime;
+					// yyy-mm-dd
+					std::string sCheckoutDate = CStringA(g_checkoutdate.Trim());
+					sCheckoutDate = sCheckoutDate.substr(0, sCheckoutDate.find_first_of(" "));
+					CString cs_sCheckoutDate(sCheckoutDate.c_str());
+					outTime.ParseDateTime(cs_sCheckoutDate);
+					datetime_checkout_room.SetTime(outTime);
+
 					// update age and address to gui
 					edit_age.SetWindowText(age);
 					edit_address.SetWindowText(address);
@@ -128,7 +125,7 @@ BOOL SpecificRoomInformationDlg::OnInitDialog()
 						{
 							std::vector<CString> foodData;
 							CString condition = L"FOODID=" + foodID;
-							DatabaseAppication::getInstance()->ExecuteQuerySelectWithCondition(L"FOOD", condition, foodData);
+							DatabaseAppication::getInstance()->ExeQuerySelectOneRowWithCond(L"FOOD", condition, foodData);
 							CString foodName = foodData[2];
 							listctrl_food.InsertItem(i, foodName);
 						}
@@ -189,7 +186,50 @@ void SpecificRoomInformationDlg::OnBnClickedBtnAdd()
 
 void SpecificRoomInformationDlg::OnBnClickedOk()
 {
-	if (!isRented)
+#pragma region MyRegion
+	// get checkout and checkin day
+	// get checkin and checkout day
+	bool newRegister = false;
+	CString oldtime;
+	CString checkinDate, checkoutDate;
+	CTime ctiDate, ctoDate;
+	datetime_checkin_room.GetTime(ctiDate);
+	ctiDate.GetDay();
+	checkinDate.Format(L"%d-%d-%d", ctiDate.GetYear(), ctiDate.GetMonth(), ctiDate.GetDay());
+	datetime_checkout_room.GetTime(ctoDate);
+	ctoDate.GetDay();
+	checkoutDate.Format(L"%d-%d-%d", ctoDate.GetYear(), ctoDate.GetMonth(), ctoDate.GetDay());
+
+	if (isRented)
+	{
+		// based on roomID, find a service in RESERVATION table with paid=0
+		std::vector<std::vector<CString>> lstRentedData;
+		CString condition = L"ROOMID='" + this->roomID + L"'";
+		DatabaseAppication::getInstance()->ExecuteQuerySelect(L"RENTEDROOM", lstRentedData);
+		for (size_t i = 0; i < lstRentedData.size(); i++)
+		{
+			std::vector<CString> temp = lstRentedData[i];
+			// find a row with same roomID
+			if (this->roomID.Compare(temp[2].Trim()) == 0)
+			{
+				serviceID = temp[0].Trim();
+				std::vector<CString> reservationData;
+				CString condition = L"SERVICEID='" + serviceID + L"'";
+				DatabaseAppication::getInstance()->ExeQuerySelectOneRowWithCond(L"RESERVATION", condition, reservationData);
+				if (reservationData.size() > 0 && reservationData[2].Trim() == L"0")
+				{
+					oldtime = temp[4].Trim();
+					break;
+				}
+			}
+		}
+
+		// compare with new checking day, if yes, turn on flag register
+		if (CompareTwoTime(oldtime, checkinDate))
+			newRegister = true;
+	}
+
+	if (!isRented || newRegister) // && newRented
 	{
 		// 1.1 For renting room
 		//  Get data from GUI (userID, date, ...)
@@ -202,18 +242,10 @@ void SpecificRoomInformationDlg::OnBnClickedOk()
 			g_sex = L"True";
 		else
 			g_sex = L"False";
-		// get checkin and checkout day
-		CString checkinDate, checkoutDate;
-		CTime ctiDate, ctoDate;
-		datetime_checkin_room.GetTime(ctiDate);
-		ctiDate.GetDay();
-		checkinDate.Format(L"%d-%d-%d", ctiDate.GetYear(), ctiDate.GetMonth(), ctiDate.GetDay());
+
 		edit_age.GetWindowText(g_age);
 		edit_address.GetWindowText(g_address);
 
-		datetime_checkout_room.GetTime(ctoDate);
-		ctoDate.GetDay();
-		checkoutDate.Format(L"%d-%d-%d", ctoDate.GetYear(), ctoDate.GetMonth(), ctoDate.GetDay());
 		//TODO: random algorithm + create a serviceID by current time
 		auto timeNow = std::chrono::system_clock::now();
 		auto duration = timeNow.time_since_epoch();
@@ -223,7 +255,7 @@ void SpecificRoomInformationDlg::OnBnClickedOk()
 		{
 			std::vector<CString> customerData;
 			CString condition = L"IDENTIFICATION='" + g_customerID + L"'";
-			DatabaseAppication::getInstance()->ExecuteQuerySelectWithCondition(L"CUSTOMER", condition, customerData);
+			DatabaseAppication::getInstance()->ExeQuerySelectOneRowWithCond(L"CUSTOMER", condition, customerData);
 			if (customerData.size() > 0)
 			{
 				// Update status Room table is rented
@@ -245,7 +277,6 @@ void SpecificRoomInformationDlg::OnBnClickedOk()
 				DatabaseAppication::getInstance()->ExecuteQueryInsert(L"CUSTOMER", lstField);
 			}
 		}
-
 		// update reservation table
 		std::vector<std::pair<DataType, CString>> lstReservationField;
  		lstReservationField.push_back(std::make_pair(STRING, this->serviceID));
@@ -266,43 +297,58 @@ void SpecificRoomInformationDlg::OnBnClickedOk()
 		std::map<CString, std::pair<DataType, CString>> listCondition;
 		listCondition[L"ROOMID"] = std::make_pair(INTEGER, roomID);
 		DatabaseAppication::getInstance()->ExecuteQueryUpdate(L"ROOM", listData, listCondition);
-		// Insert to table FOODORDER
+		AddFood();
+		// Get price from room table
+	}
+#pragma endregion
+	else
+	{
+		//MessageBox(L"Room is not available");
+		// Add food when has been reservation
+		if (lstFood.size() > 0)
+			AddFood(true);
+	}
+	CDialogEx::OnOK();
+}
+
+void SpecificRoomInformationDlg::AddFood(bool isAdditionalFood)
+{
+	// Insert to table FOODORDER
+	if (!isAdditionalFood)
+	{
 		std::vector<std::pair<DataType, CString>> lstOrder;
 		lstOrder.push_back(std::make_pair(STRING, this->serviceID));
 		lstOrder.push_back(std::make_pair(STRING, this->g_customerID));
 		lstOrder.push_back(std::make_pair(STRING, L"False"));
 		DatabaseAppication::getInstance()->ExecuteQueryInsert(L"FOODORDER", lstOrder);
-		for (size_t i = 0; i < lstFood.size(); i++)
-		{
-			// Insert to table USINGFOOD
-			std::vector<std::pair<DataType, CString>> lstField;
-			lstField.push_back(std::make_pair(STRING, this->serviceID));
-			lstField.push_back(std::make_pair(STRING, this->staffID));
-			// find foodID to insert into usingfood table
-			std::vector<CString> foodData;
-			CString conditionFood = L"FOODNAME='" + lstFood[i] + L"' AND ISUSED='False'" ;
-			DatabaseAppication::getInstance()->ExecuteQuerySelectWithCondition(L"FOOD", conditionFood, foodData);
-			CString foodID = foodData[0].Trim();
-			lstField.push_back(std::make_pair(INTEGER,foodID));
-			lstField.push_back(std::make_pair(STRING, checkinDate));
-			DatabaseAppication::getInstance()->ExecuteQueryInsert(L"USINGFOOD", lstField);
-			// update status of used food in FOOD talbe is true
-			// Update status Room table is rented
-			std::map<CString, std::pair<DataType, CString>> listData;
-			listData[L"ISUSED"] = std::make_pair(STRING, L"True");
-			std::map<CString, std::pair<DataType, CString>> listCondition;
-			listCondition[L"FOODID"] = std::make_pair(INTEGER, foodID);
-			DatabaseAppication::getInstance()->ExecuteQueryUpdate(L"FOOD", listData, listCondition);
-		}
-		// Get price from room table
 	}
-	else
+	for (size_t i = 0; i < lstFood.size(); i++)
 	{
-		//MessageBox(L"Room is not available");
+		// Insert to table USINGFOOD
+		std::vector<std::pair<DataType, CString>> lstField;
+		lstField.push_back(std::make_pair(STRING, this->serviceID));
+		lstField.push_back(std::make_pair(STRING, this->staffID));
+		// find foodID to insert into usingfood table
+		std::vector<CString> foodData;
+		CString conditionFood = L"FOODNAME='" + lstFood[i] + L"' AND ISUSED='False'";
+		DatabaseAppication::getInstance()->ExeQuerySelectOneRowWithCond(L"FOOD", conditionFood, foodData);
+		CString foodID = foodData[0].Trim();
+		lstField.push_back(std::make_pair(INTEGER, foodID));
+		CTime t = CTime::GetCurrentTime();
+		CString currentTime = t.Format("%Y%m%d");
+		lstField.push_back(std::make_pair(STRING, currentTime));
+		DatabaseAppication::getInstance()->ExecuteQueryInsert(L"USINGFOOD", lstField);
+		// update status of used food in FOOD talbe is true
+		// Update status Room table is rented
+		std::map<CString, std::pair<DataType, CString>> listData;
+		listData[L"ISUSED"] = std::make_pair(STRING, L"True");
+		std::map<CString, std::pair<DataType, CString>> listCondition;
+		listCondition[L"FOODID"] = std::make_pair(INTEGER, foodID);
+		DatabaseAppication::getInstance()->ExecuteQueryUpdate(L"FOOD", listData, listCondition);
 	}
-	CDialogEx::OnOK();
-}
 
+
+}
 
 void SpecificRoomInformationDlg::OnBnClickedButtonPayment()
 {

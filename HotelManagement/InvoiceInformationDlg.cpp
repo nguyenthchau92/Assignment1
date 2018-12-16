@@ -45,7 +45,7 @@ BOOL InvoiceInformationDlg::OnInitDialog()
 			// Get price from room table based on ROOMID
 			std::vector<CString> lstRoomData;
 			CString condition = L"ROOMID=" + temp[2].Trim();
-			DatabaseAppication::getInstance()->ExecuteQuerySelectWithCondition(L"ROOM", condition, lstRoomData);
+			DatabaseAppication::getInstance()->ExeQuerySelectOneRowWithCond(L"ROOM", condition, lstRoomData);
 			if (lstRoomData.size() > 0)
 			{
 				CString roomName = lstRoomData[6].Trim();
@@ -68,7 +68,7 @@ BOOL InvoiceInformationDlg::OnInitDialog()
 			// Get price from FOOD table based on FOODNAME
 			std::vector<CString> lstFoodData;
 			CString condition = L"FOODID=" + temp[2].Trim();
-			DatabaseAppication::getInstance()->ExecuteQuerySelectWithCondition(L"FOOD", condition, lstFoodData);
+			DatabaseAppication::getInstance()->ExeQuerySelectOneRowWithCond(L"FOOD", condition, lstFoodData);
 			if (lstFoodData.size() > 0)
 			{
 				CString foodCost = lstFoodData[5].Trim();
@@ -108,21 +108,11 @@ BOOL InvoiceInformationDlg::OnInitDialog()
 	// update customer name from userID
 	std::vector<CString> lstUsername;
 	CString condition = L"IDENTIFICATION='" + identification + "'";
-	DatabaseAppication::getInstance()->ExecuteQuerySelectWithCondition(L"CUSTOMER", condition, lstUsername);
+	DatabaseAppication::getInstance()->ExeQuerySelectOneRowWithCond(L"CUSTOMER", condition, lstUsername);
 	if (lstUsername.size() > 0)
 		username = lstUsername[4].Trim();
 	edit_name_user.SetWindowText(username);
 
-	// update time
-	/*SYSTEMTIME billTime;
-	int ci_year = 0, ci_day = 0, ci_month = 0;
-	memset(&billTime, 0x00, sizeof(SYSTEMTIME));
-	std::string stimeInvoice = CStringA(timeInvoice);
-	stimeInvoice = stimeInvoice.substr(0, stimeInvoice.find_first_of(" "));
-	sscanf((char*)stimeInvoice.c_str(), "%d-%d-%d", &ci_year, &ci_month, &ci_day);
-	billTime.wYear = ci_year;
-	billTime.wDay = ci_day;
-	billTime.wMonth = ci_month;*/
 	COleDateTime tm1;
 	tm1.ParseDateTime(timeInvoice);
 	datetime_picker_invoice.SetTime(tm1);
@@ -130,27 +120,25 @@ BOOL InvoiceInformationDlg::OnInitDialog()
 	// find name staff in table staff based on staffid
 	std::vector<CString> staffData;
 	CString conditionStaff = L"STAFFID='" + staffID + L"'";
-	DatabaseAppication::getInstance()->ExecuteQuerySelectWithCondition(L"STAFF", conditionStaff, staffData);
+	DatabaseAppication::getInstance()->ExeQuerySelectOneRowWithCond(L"STAFF", conditionStaff, staffData);
 	if (staffData.size() > 0)
 	{
 		edit_staff_name.SetWindowText(staffData[4]);
 	}
-
-	 //add foodName, foodCost.......
+	// Add foodName, foodCost
 	for (size_t i = 0; i < lstFoodCost.size(); i++)
 	{
 		std::map<CString, CString> tmp = lstFoodCost[i];
 		list_ctrl_item.InsertItem(i, tmp.begin()->first);
 		list_ctrl_item.SetItemText(i, 1, tmp.begin()->second);
 	}
-	// roomName, roomCost......
+	// Add roomName, roomCost
 	for (size_t i = 0; i < lstRoomCost.size(); i++)
 	{
 		std::map<CString, CString> tmp = lstRoomCost[i];
 		list_ctrl_item.InsertItem(i + lstFoodCost.size(), L"Room " + tmp.begin()->first);
 		list_ctrl_item.SetItemText(i + lstFoodCost.size(), 1, tmp.begin()->second);
 	}
-
 	// add cost invoice to gui
 	edit_total_price.SetWindowText(costInvoice);
 	//	2.4 Update status room is empty, reservation is empty

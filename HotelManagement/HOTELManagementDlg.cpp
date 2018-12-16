@@ -14,6 +14,7 @@
 #include "DatabaseAppication.h"
 #include "SpecificRoomInformationDlg.h"
 #include "RoomsInformationDlg.h"
+#include "ManagerManagement.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -171,18 +172,36 @@ void HOTELManagementDlg::OnBnClickedBtnLogin()
 	edit_password.GetWindowText(pass_login);
 	
 	// get username and password from register table
-	std::vector<CString> userInfo;
+	std::vector<CString> registerInfo;
 	CString condition = L" USERNAME='" + us_login + L"' and PASSWORD='" + pass_login + L"'";
-	DatabaseAppication::getInstance()->ExecuteQuerySelectWithCondition(L"REGISTER", condition, userInfo);
+	DatabaseAppication::getInstance()->ExeQuerySelectOneRowWithCond(L"REGISTER", condition, registerInfo);
+	CString staffID = registerInfo[1].Trim();
 	// compare with data is input from GUI
-	if (userInfo.size() > 0)
+	if (registerInfo.size() > 0)
 	{
 			// if yes, go to main monitor
 		isLoginOk = true;
-		RoomsInformationDlg roomInfo_dlg;
-		// find staffid based on us_login
-		roomInfo_dlg.setStaffID(userInfo[1].Trim());
-		roomInfo_dlg.DoModal();
+		// find the position of staff
+		std::vector<CString> userInfo;
+		CString condition = L" STAFFID='" + staffID + L"'";
+		DatabaseAppication::getInstance()->ExeQuerySelectOneRowWithCond(L"STAFF", condition, userInfo);
+		CString position = userInfo[8].Trim();
+		CString branchID = userInfo[1].Trim();
+		if (position.Compare(L"Manager") == 0)
+		{
+			ManagerManagement mngManagement;
+			// if manager, go to sceen management
+			mngManagement.setStaffID(staffID);
+			mngManagement.setBranchID(branchID);
+			mngManagement.DoModal();
+		}
+		else if (position.Compare(L"Receptionist") == 0 )
+		{
+			RoomsInformationDlg roomInfo_dlg;
+			roomInfo_dlg.setStaffID(staffID);
+			// if staff, go to screen room management
+			roomInfo_dlg.DoModal();
+		}
 	}
 
 	if (!isLoginOk)

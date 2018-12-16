@@ -17,14 +17,10 @@ select * from chef
 select * from cleaner
 select * from receptionist
 select * from register
-
 select * from customer
 select * from reservation
 select * from foodorder
-
 select * from food
-select distinct FOODNAME from food
-
 
 delete from rentedroom
 delete from usingfood
@@ -55,15 +51,19 @@ delete from customer
 	2.3 Get data from table Bill to GUI
 	2.4 Updat status room to empty
 3. // for renting by checking date and time
-    3.1 Utility for support time management, If another reservation for future (Bug)
+    3.1 Green button
 	
-    3.2 Green button
+	3.2 Utility for support time management, If another reservation for future (Bug) //TODO:
 	
-4. For rented many room
+	3.3 Adding food   
+
+4. For statistics of monthly income ( based on Bill)	
+	
+5. For rented many room
     3.1 GUI for renting many room
     3.2 Payment: Choosing latest room based on smallest day in the order of renting room in RENTEDROOM
     3.3 
 
-5. For statistics of monthly income ( based on Bill)
+
 
 // Key-Value store in chaper 24 Database

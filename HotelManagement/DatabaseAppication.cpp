@@ -32,7 +32,7 @@ DatabaseAppication* DatabaseAppication::getInstance()
 }
 
 // just return the first row when satisfy the condition
-void DatabaseAppication::ExecuteQuerySelectWithCondition(CString nameTable, CString condition, std::vector<CString> &lstData)
+void DatabaseAppication::ExeQuerySelectOneRowWithCond(CString nameTable, CString condition, std::vector<CString> &lstData)
 {
 	CString query = L"select * from " + nameTable + L" where " + condition;
 	//MessageBox(NULL, query, L"", 0);
@@ -47,6 +47,49 @@ void DatabaseAppication::ExecuteQuerySelectWithCondition(CString nameTable, CStr
 			recordset.GetFieldValue(i, temp);
 			lstData.push_back(temp);
 		}
+	}
+}
+
+void DatabaseAppication::ExeQuerySelectWithBill(CString nameTable, CString year, CString month, std::vector<std::vector<CString>> &lstData)
+{
+	CString query = L"select * from " + nameTable + L" where MONTH(TIMEINVOICE)= " + month + L" AND YEAR(TIMEINVOICE)= " + year;
+	//MessageBox(NULL, query, L"", 0);
+	CRecordset recordset(&database);
+	CString temp;
+	recordset.Open(CRecordset::forwardOnly, query, CRecordset::readOnly);
+	while (!recordset.IsEOF())
+	{
+		std::vector<CString> row;
+		int len = recordset.GetODBCFieldCount();
+		for (int i = 0; i < len; i++)
+		{
+			recordset.GetFieldValue(i, temp);
+			row.push_back(temp);
+		}
+		lstData.push_back(row);
+		recordset.MoveNext();
+	}
+}
+
+// just return the first row when satisfy the condition
+void DatabaseAppication::ExeQuerySelectWithCond(CString nameTable, CString condition, std::vector<std::vector<CString>> &lstData)
+{
+	CString query = L"select * from " + nameTable + L" where " + condition;
+	//MessageBox(NULL, query, L"", 0);
+	CRecordset recordset(&database);
+	CString temp;
+	recordset.Open(CRecordset::forwardOnly, query, CRecordset::readOnly);
+	while (!recordset.IsEOF())
+	{
+		std::vector<CString> row;
+		int len = recordset.GetODBCFieldCount();
+		for (int i = 0; i < len; i++)
+		{
+			recordset.GetFieldValue(i, temp);
+			row.push_back(temp);
+		}
+		lstData.push_back(row);
+		recordset.MoveNext();
 	}
 }
 

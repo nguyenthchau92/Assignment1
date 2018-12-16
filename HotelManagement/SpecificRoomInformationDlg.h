@@ -56,4 +56,5 @@ protected:
 	CListCtrl listctrl_food;
 public:
 	afx_msg void OnBnClickedButtonPayment();
+	void AddFood(bool isAdditionalFood = false);
 };
