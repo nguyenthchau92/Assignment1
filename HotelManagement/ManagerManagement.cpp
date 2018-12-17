@@ -98,7 +98,7 @@ BOOL ManagerManagement::OnInitDialog()
 		name = recordStaff[4];
 		salary = recordStaff[7];
 		position = recordStaff[8];
-		fTotalSalary += _tstof(salary);
+		fTotalSalary -= _tstof(salary);
 		lst_ctrl_salary.InsertItem(rowGui, staffID);
 		lst_ctrl_salary.SetItemText(rowGui, 1, name);
 		lst_ctrl_salary.SetItemText(rowGui, 2, salary);
