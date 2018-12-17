@@ -78,7 +78,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
@@ -103,33 +103,31 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DatabaseAppication.h" />
-    <ClInclude Include="RoomInfo.h" />
-    <ClInclude Include="ListRoomsInformationDlg.h" />
-    <ClInclude Include="AcInfo.h" />
+    <ClInclude Include="InvoiceInformationDlg.h" />
+    <ClInclude Include="ManagerManagement.h" />
     <ClInclude Include="HOTELManagement.h" />
     <ClInclude Include="HOTELManagementDlg.h" />
     <ClInclude Include="RegisterDlg.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="RoomsInformationDlg.h" />
     <ClInclude Include="SpecificRoomInformationDlg.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="StoragePathDlg.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Util.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DatabaseAppication.cpp" />
-    <ClCompile Include="RoomInfo.cpp" />
-    <ClCompile Include="ListRoomsInformationDlg.cpp" />
-    <ClCompile Include="AcInfo.cpp" />
+    <ClCompile Include="InvoiceInformationDlg.cpp" />
+    <ClCompile Include="ManagerManagement.cpp" />
     <ClCompile Include="HOTELManagement.cpp" />
     <ClCompile Include="HOTELManagementDlg.cpp" />
     <ClCompile Include="RegisterDlg.cpp" />
+    <ClCompile Include="RoomsInformationDlg.cpp" />
     <ClCompile Include="SpecificRoomInformationDlg.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="StoragePathDlg.cpp" />
     <ClCompile Include="Util.cpp" />
   </ItemGroup>
   <ItemGroup>
